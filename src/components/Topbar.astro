@@ -1,0 +1,41 @@
+---
+import BrandMark from './BrandMark.astro';
+import Icon from './Icon.astro';
+import { NAV, href, type PageKey } from '../lib/paths';
+
+interface Props {
+  page: PageKey;
+  app: boolean;
+}
+const { page, app } = Astro.props;
+---
+
+<header class="topbar">
+  <div class="topbar__inner">
+    <a class="brand" href={href('/')} aria-label="Windows Golden Panel, overview">
+      <BrandMark class="brand__mark" />
+      <span class="brand__text">Windows Golden<span class="brand__sub"> Panel</span></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      {NAV.map((item) => (
+        <a href={href(item.path)} aria-current={item.key === page ? 'page' : undefined}>{item.label}</a>
+      ))}
+    </nav>
+    {app ? (
+      <div class="identity" data-identity>
+        <span class="identity__user" data-identity-user hidden>
+          <img class="identity__avatar" data-identity-avatar alt="" width="22" height="22" />
+          <span class="identity__name" data-identity-name></span>
+        </span>
+        <a class="btn btn--ghost btn--sm" data-identity-signin href={href('/settings/#account')} hidden>Sign in</a>
+        <button class="btn btn--ghost btn--sm btn--icon" type="button" data-identity-signout hidden aria-label="Sign out" title="Sign out">
+          <Icon name="logout" />
+        </button>
+      </div>
+    ) : (
+      <div class="identity">
+        <a class="btn btn--primary btn--sm" href={href('/panel/')}>Open panel</a>
+      </div>
+    )}
+  </div>
+</header>

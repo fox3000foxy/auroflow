@@ -1,0 +1,261 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import IconSprites from '../components/IconSprites.astro';
+import DeviceLogin from '../components/DeviceLogin.astro';
+import { href } from '../lib/paths';
+import { SPEC } from '../lib/config';
+import '../styles/app.css';
+import '../styles/panel.css';
+
+const stages = ['Runner', 'Dataset', 'Golden Image', 'Layers', 'Boot', 'Tunnel', 'Session', 'Save'];
+---
+
+<BaseLayout title="Panel" description="Manage your Windows Golden virtual machine." page="panel" app>
+  <IconSprites names={['check', 'x', 'alert', 'info', 'external', 'minus', 'circle']} />
+  <main id="main" class="app" tabindex="-1">
+    <!-- Loading -->
+    <section class="gate" data-gate="loading" aria-busy="true">
+      <div class="gate__skeleton">
+        <span class="skeleton" style="width: 220px; height: 22px"></span>
+        <span class="skeleton" style="width: 340px"></span>
+      </div>
+    </section>
+
+    <!-- Signed out -->
+    <section class="gate" data-gate="signed-out" hidden>
+      <div class="gate__card frame">
+        <div class="frame__body gate__body">
+          <h1 class="gate__title">Sign in to manage your instance</h1>
+          <p class="gate__text">
+            The panel uses your GitHub account to start and stop the VM workflow in your workspace repository. The token stays in this browser tab.
+          </p>
+          <DeviceLogin />
+        </div>
+      </div>
+    </section>
+
+    <!-- No workspace -->
+    <section class="gate" data-gate="no-workspace" hidden>
+      <div class="gate__card frame">
+        <div class="frame__body gate__body">
+          <h1 class="gate__title">Set up a workspace</h1>
+          <p class="gate__text">
+            A workspace is a repository created from the Golden template, holding the VM workflow and your ngrok and Hugging Face secrets.
+          </p>
+          <a class="btn btn--primary" href={href('/settings/#workspace')}>Configure workspace</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Fatal error -->
+    <section class="gate" data-gate="error" hidden>
+      <div class="gate__card frame">
+        <div class="frame__body gate__body">
+          <h1 class="gate__title" data-gate-error-title>The panel could not load</h1>
+          <p class="gate__text" data-gate-error-text></p>
+          <div class="gate__actions">
+            <button class="btn btn--primary" type="button" data-gate-retry>
+              <Icon name="refresh" /> Try again
+            </button>
+            <a class="btn" href={href('/settings/')}>Open settings</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dashboard -->
+    <div class="panel" data-gate="ready" hidden>
+      <header class="instance">
+        <div class="instance__id">
+          <p class="instance__os">{SPEC.os}</p>
+          <h1 class="instance__name" data-instance-name></h1>
+          <a class="instance__repo" data-instance-repo target="_blank" rel="noopener noreferrer"></a>
+        </div>
+        <div class="instance__state">
+          <span class="status status--lg" data-vm-status data-tone="unknown" role="status" aria-live="polite">
+            <span class="status__dot" aria-hidden="true"></span>
+            <span data-status-label>Checking</span>
+          </span>
+          <p class="instance__detail" data-status-detail>Reading the workflow state from GitHub.</p>
+        </div>
+      </header>
+
+      <div class="toolbar" role="toolbar" aria-label="Instance controls">
+        <div class="toolbar__group">
+          <button class="btn btn--primary" type="button" data-action="start" disabled>
+            <Icon name="play" /> Start instance
+          </button>
+          <button class="btn" type="button" data-action="shutdown" disabled>
+            <Icon name="power" /> Shut down
+          </button>
+          <button class="btn btn--danger" type="button" data-action="force" disabled>
+            <Icon name="square" /> Force stop
+          </button>
+        </div>
+        <div class="toolbar__group toolbar__group--end">
+          <span class="toolbar__meta" data-refresh-meta aria-live="off"></span>
+          <button class="btn btn--icon" type="button" data-action="refresh" aria-label="Refresh now" title="Refresh now">
+            <Icon name="refresh" />
+          </button>
+        </div>
+      </div>
+
+      <div class="notice notice--danger" data-api-error hidden>
+        <Icon name="alert" />
+        <div>
+          <p><strong>GitHub API error.</strong> <span data-api-error-text></span></p>
+          <p>The state below is from the last successful refresh.</p>
+        </div>
+      </div>
+
+      <div class="notice notice--warn" data-public-warning hidden>
+        <Icon name="globe" />
+        <div>
+          <p><strong>This workspace is public.</strong> Anyone can read the RDP endpoint from the <code>golden-control</code> branch and the workflow annotations.</p>
+          <p>The reference image has a passwordless account and ngrok does not authenticate RDP clients. Set a strong Windows password before connecting, or make the workspace private in <a href={href('/settings/#workspace')}>Settings</a>.</p>
+        </div>
+      </div>
+
+      <div class="panel__grid">
+        <div class="panel__main">
+          <!-- Connection -->
+          <section class="frame connection" aria-labelledby="connection-title">
+            <div class="frame__head">
+              <h2 class="frame__title" id="connection-title"><Icon name="monitor" /> Remote Desktop</h2>
+              <a class="frame__link" data-workflow-link target="_blank" rel="noopener noreferrer" hidden>
+                <span data-workflow-link-text>Workflow run</span> <Icon name="external" size={13} />
+              </a>
+            </div>
+            <div class="connection__body">
+              <div class="endpoint" data-endpoint-state="none">
+                <span class="endpoint__label">Endpoint</span>
+                <div class="endpoint__row">
+                  <code class="endpoint__value" data-endpoint>No active endpoint</code>
+                  <button class="btn btn--sm" type="button" data-action="copy" disabled>
+                    <Icon name="copy" /> <span data-copy-label>Copy</span>
+                  </button>
+                </div>
+                <p class="endpoint__note" data-endpoint-note>Start the instance to open an RDP tunnel.</p>
+              </div>
+              <dl class="connection__facts">
+                <div>
+                  <dt>Session time</dt>
+                  <dd class="tabular" data-session-elapsed>Not running</dd>
+                </div>
+                <div>
+                  <dt>Automatic shutdown</dt>
+                  <dd class="tabular" data-session-deadline>287 min after start</dd>
+                </div>
+                <div>
+                  <dt>Client</dt>
+                  <dd>Any RDP client, without the <code>tcp://</code> prefix</dd>
+                </div>
+              </dl>
+            </div>
+          </section>
+
+          <!-- Lifecycle -->
+          <section class="frame" aria-labelledby="lifecycle-title">
+            <div class="frame__head">
+              <h2 class="frame__title" id="lifecycle-title"><Icon name="workflow" /> Lifecycle</h2>
+              <span class="frame__meta" data-lifecycle-meta></span>
+            </div>
+            <ol class="stages" data-stages>
+              {stages.map((label, index) => (
+                <li class="stage" data-stage-index={index} data-status="pending">
+                  <span class="stage__bar" aria-hidden="true"></span>
+                  <span class="stage__label">{label}</span>
+                  <span class="visually-hidden" data-stage-sr>pending</span>
+                </li>
+              ))}
+            </ol>
+          </section>
+
+          <!-- Activity -->
+          <section class="frame activity" aria-labelledby="activity-title">
+            <div class="frame__head">
+              <h2 class="frame__title" id="activity-title"><Icon name="list" /> Activity</h2>
+              <div class="tabs" role="tablist" aria-label="Activity source">
+                <button class="tab" role="tab" type="button" id="tab-runs" aria-controls="panel-runs" aria-selected="true" data-tab="runs">Workflow runs</button>
+                <button class="tab" role="tab" type="button" id="tab-log" aria-controls="panel-log" aria-selected="false" tabindex="-1" data-tab="log">Panel log</button>
+              </div>
+            </div>
+            <div role="tabpanel" id="panel-runs" aria-labelledby="tab-runs" data-tabpanel="runs">
+              <table class="runs">
+                <thead>
+                  <tr>
+                    <th scope="col">Run</th>
+                    <th scope="col">Result</th>
+                    <th scope="col">Started</th>
+                    <th scope="col">Duration</th>
+                    <th scope="col"><span class="visually-hidden">Link</span></th>
+                  </tr>
+                </thead>
+                <tbody data-runs></tbody>
+              </table>
+              <p class="empty" data-runs-empty hidden>No workflow runs yet. Start the instance to create the first session.</p>
+            </div>
+            <div role="tabpanel" id="panel-log" aria-labelledby="tab-log" data-tabpanel="log" hidden>
+              <ol class="log" data-log></ol>
+              <p class="empty" data-log-empty>Actions taken from this browser appear here.</p>
+            </div>
+          </section>
+        </div>
+
+        <aside class="panel__side" aria-label="Instance details">
+          <section class="frame" aria-labelledby="compute-title">
+            <div class="frame__head">
+              <h2 class="frame__title" id="compute-title"><Icon name="cpu" /> Compute</h2>
+            </div>
+            <dl class="kv frame__body" data-compute>
+              <dt>Host</dt><dd>GitHub-hosted runner</dd>
+              <dt>Runner</dt><dd data-runner>Assigned at start</dd>
+              <dt>Hypervisor</dt><dd>QEMU/KVM, {SPEC.machine}</dd>
+              <dt>vCPUs</dt><dd>All runner processors</dd>
+              <dt>Memory</dt><dd>Available memory minus about 1 GiB</dd>
+              <dt>Firmware</dt><dd>{SPEC.firmware}</dd>
+              <dt>Time limit</dt><dd>300 min per session</dd>
+            </dl>
+          </section>
+
+          <section class="frame" aria-labelledby="storage-title">
+            <div class="frame__head">
+              <h2 class="frame__title" id="storage-title"><Icon name="database" /> Storage</h2>
+            </div>
+            <dl class="kv frame__body">
+              <dt>Virtual disk</dt><dd>{SPEC.virtualDisk}, QCOW2</dd>
+              <dt>Golden Image</dt><dd data-golden-tag><span class="skeleton"></span></dd>
+              <dt>Image size</dt><dd data-golden-size><span class="skeleton"></span></dd>
+              <dt>Image cache</dt><dd data-golden-cache><span class="skeleton"></span></dd>
+              <dt>Dataset</dt><dd data-dataset><span class="skeleton"></span></dd>
+              <dt>Saved layers</dt><dd data-layers><span class="skeleton"></span></dd>
+              <dt>Dataset size</dt><dd data-dataset-size><span class="skeleton"></span></dd>
+            </dl>
+            <p class="frame__foot" data-storage-note hidden></p>
+          </section>
+
+          <section class="frame frame--secondary" aria-labelledby="actions-title">
+            <div class="frame__head">
+              <h2 class="frame__title" id="actions-title"><Icon name="github" /> GitHub Actions</h2>
+            </div>
+            <dl class="kv frame__body">
+              <dt>Run</dt><dd data-gh-run>None</dd>
+              <dt>Status</dt><dd data-gh-status>None</dd>
+              <dt>Current step</dt><dd data-gh-step>None</dd>
+              <dt>Trigger</dt><dd data-gh-trigger>None</dd>
+              <dt>Created</dt><dd data-gh-created>None</dd>
+            </dl>
+          </section>
+        </aside>
+      </div>
+    </div>
+  </main>
+</BaseLayout>
+
+<script>
+  import { initShell } from '../scripts/shell';
+  import { initPanel } from '../scripts/panel';
+  initShell();
+  initPanel();
+</script>

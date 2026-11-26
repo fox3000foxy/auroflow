@@ -1,0 +1,100 @@
+/* Design tokens. Every colour, size and duration in the app comes from here. */
+
+:root {
+  color-scheme: dark;
+
+  /* Graphite and charcoal */
+  --c-ink: #141619;
+  --c-base: #17191c;
+  --c-surface: #1d2024;
+  --c-raised: #24282d;
+  --c-sunken: #121417;
+  --c-line: #2e3238;
+  --c-line-strong: #3d424a;
+  --c-line-faint: #24272c;
+
+  /* Text */
+  --c-text: #e8e4da;
+  --c-text-2: #b7b3aa;
+  --c-muted: #8d8f92;
+  --c-dim: #63666b;
+
+  /* Champagne, used sparingly: primary action, focus, active navigation */
+  --c-gold: #cdb57e;
+  --c-gold-strong: #dcc690;
+  --c-gold-deep: #9c8656;
+  --c-gold-wash: rgba(205, 181, 126, 0.08);
+  --c-gold-line: rgba(205, 181, 126, 0.32);
+
+  /* VM state colours, reserved for status */
+  --c-off: #e06a5f;
+  --c-boot: #e2bd4f;
+  --c-on: #6cc483;
+  --c-stop: #e0914f;
+  --c-save: #86aed4;
+  --c-unknown: #8d8f92;
+
+  /* Feedback */
+  --c-danger: #e06a5f;
+  --c-danger-wash: rgba(224, 106, 95, 0.07);
+  --c-danger-line: rgba(224, 106, 95, 0.35);
+  --c-warn: #e2bd4f;
+  --c-warn-wash: rgba(226, 189, 79, 0.07);
+  --c-warn-line: rgba(226, 189, 79, 0.3);
+  --c-ok: #6cc483;
+
+  /* Type */
+  --f-sans: 'Schibsted Grotesk Variable', 'Helvetica Neue', Arial, sans-serif;
+  --f-mono: 'JetBrains Mono Variable', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  /* Modular scale (1.2) anchored at 14px for the app */
+  --t-xs: 0.75rem;   /* 12 */
+  --t-sm: 0.8125rem; /* 13 */
+  --t-md: 0.875rem;  /* 14 */
+  --t-lg: 1rem;      /* 16 */
+  --t-xl: 1.25rem;   /* 20 */
+  --t-2xl: 1.5rem;   /* 24 */
+  --t-3xl: 2rem;     /* 32 */
+
+  --lh-tight: 1.15;
+  --lh-snug: 1.35;
+  --lh-body: 1.55;
+
+  /* Spacing (4px grid) */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+  --s-10: 40px;
+  --s-12: 48px;
+  --s-16: 64px;
+  --s-20: 80px;
+
+  /* Shape. Radii are small and tied to hierarchy. */
+  --r-control: 3px;
+  --r-frame: 4px;
+  --r-pill: 999px;
+
+  --shadow-pop: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 18px 48px -12px rgba(0, 0, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.35);
+  --shadow-control: 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --d-fast: 120ms;
+  --d-base: 200ms;
+  --d-slow: 420ms;
+
+  --header-h: 56px;
+  --content-max: 1280px;
+  --focus: 0 0 0 2px var(--c-base), 0 0 0 4px var(--c-gold);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --d-fast: 0ms;
+    --d-base: 0ms;
+    --d-slow: 0ms;
+  }
+}

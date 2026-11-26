@@ -1,0 +1,14 @@
+---
+/** Icons cloned by client scripts (see icon() in src/lib/ui.ts). */
+import Icon from './Icon.astro';
+import type { IconName } from './icons';
+
+interface Props {
+  names: IconName[];
+}
+const { names } = Astro.props;
+---
+
+<template id="icon-sprites">
+  {names.map((name) => <Icon name={name} />)}
+</template>

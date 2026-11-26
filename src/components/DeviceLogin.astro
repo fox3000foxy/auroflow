@@ -1,0 +1,103 @@
+---
+import Icon from './Icon.astro';
+import { AUTH_URL } from '../lib/config';
+
+interface Props {
+  compact?: boolean;
+}
+const { compact = false } = Astro.props;
+---
+
+<div class:list={['device-login', { 'device-login--compact': compact }]} data-device-login>
+  {!AUTH_URL && (
+    <div class="notice notice--danger">
+      <Icon name="alert" />
+      <p>This build has no authentication relay. Set <code>PUBLIC_AUTH_URL</code> to the deployed worker URL and rebuild.</p>
+    </div>
+  )}
+  <div class="device-login__idle" data-dl-idle>
+    <label class="check device-login__remember">
+      <input type="checkbox" data-dl-remember />
+      Stay signed in on this browser for 7 days
+    </label>
+    <p class="field__hint">Off by default: the token is kept only in this tab. Turn on only on a personal device.</p>
+    <button class="btn btn--primary" type="button" data-dl-start disabled={!AUTH_URL}>
+      <Icon name="github" />
+      Sign in with GitHub
+    </button>
+  </div>
+  <div class="device-login__pending" data-dl-pending hidden>
+    <p class="device-login__step">
+      Open <a data-dl-link href="https://github.com/login/device" target="_blank" rel="noopener noreferrer">github.com/login/device</a> and enter this code:
+    </p>
+    <div class="device-code">
+      <output class="device-code__value" data-dl-code aria-live="polite"></output>
+      <button class="btn btn--sm" type="button" data-dl-copy>
+        <Icon name="copy" />
+        Copy code
+      </button>
+    </div>
+    <p class="device-login__status" data-dl-status role="status">Waiting for confirmation on GitHub.</p>
+    <button class="btn btn--ghost btn--sm" type="button" data-dl-cancel>Cancel</button>
+  </div>
+  <p class="field__error" data-dl-error role="alert" hidden></p>
+</div>
+
+<style>
+  .device-login {
+    display: grid;
+    gap: var(--s-3);
+    justify-items: start;
+  }
+
+  .device-login__idle {
+    display: grid;
+    gap: var(--s-2);
+    justify-items: start;
+  }
+
+  .device-login__idle .btn {
+    margin-top: var(--s-2);
+  }
+
+  .device-login__pending {
+    display: grid;
+    gap: var(--s-3);
+    justify-items: start;
+    width: 100%;
+  }
+
+  .device-login__step {
+    font-size: var(--t-sm);
+    color: var(--c-text-2);
+  }
+
+  .device-code {
+    display: flex;
+    align-items: center;
+    gap: var(--s-3);
+    padding: var(--s-2) var(--s-2) var(--s-2) var(--s-4);
+    border: 1px solid var(--c-gold-line);
+    border-radius: var(--r-control);
+    background: var(--c-sunken);
+  }
+
+  .device-code__value {
+    font-family: var(--f-mono);
+    font-size: var(--t-2xl);
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    color: var(--c-gold);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .device-login__status {
+    font-size: var(--t-xs);
+    color: var(--c-muted);
+  }
+</style>
+
+<script>
+  import { initDeviceLogins } from '../scripts/device-login';
+  initDeviceLogins();
+</script>

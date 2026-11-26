@@ -1,0 +1,244 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import IconSprites from '../components/IconSprites.astro';
+import DeviceLogin from '../components/DeviceLogin.astro';
+import { ENGINE_OWNER, ENGINE_REPO, ENGINE_URL, DEFAULT_WORKSPACE_REPO, SECRET_HF, SECRET_NGROK, VAR_HF_REPO, VAR_RDP_CIDR } from '../lib/config';
+import '../styles/app.css';
+import '../styles/settings.css';
+
+const sections = [
+  { id: 'account', label: 'Account' },
+  { id: 'workspace', label: 'Workspace' },
+  { id: 'credentials', label: 'Credentials' },
+  { id: 'network', label: 'Network' },
+  { id: 'validation', label: 'Validation' },
+  { id: 'danger', label: 'Danger zone' },
+];
+---
+
+<BaseLayout title="Settings" description="Configure your Windows Golden workspace." page="settings" app>
+  <IconSprites names={['check', 'x', 'alert', 'minus', 'circle']} />
+  <main id="main" class="app settings" tabindex="-1">
+    <header class="settings__head">
+      <h1 class="settings__title">Settings</h1>
+      <p class="settings__lede">Account, workspace repository and the credentials the VM workflow uses. Tokens are sealed into GitHub secrets and never written to the repository.</p>
+    </header>
+
+    <div class="settings__layout">
+      <nav class="settings__index" aria-label="Settings sections">
+        <ul>
+          {sections.map((s) => (
+            <li><a href={`#${s.id}`} data-index-link={s.id}>{s.label}</a></li>
+          ))}
+        </ul>
+      </nav>
+
+      <div class="settings__content">
+        <!-- Account -->
+        <section class="section" id="account" aria-labelledby="account-title">
+          <div class="section__intro">
+            <h2 class="section__title" id="account-title">Account</h2>
+            <p class="section__text">GitHub Device Flow through the authentication relay. By default the token is kept in this browser tab only and removed when you sign out or close the tab.</p>
+          </div>
+          <div class="section__body">
+            <div data-account-loading><span class="skeleton" style="width: 180px"></span></div>
+            <div data-account-signed-out hidden>
+              <DeviceLogin />
+            </div>
+            <div class="account" data-account-signed-in hidden>
+              <img class="account__avatar" data-account-avatar alt="" width="40" height="40" />
+              <div class="account__who">
+                <p class="account__name" data-account-name></p>
+                <p class="account__meta" data-account-scopes></p>
+              </div>
+              <button class="btn btn--sm" type="button" data-signout>
+                <Icon name="logout" /> Sign out
+              </button>
+            </div>
+            <div class="notice notice--warn" data-scope-warning hidden>
+              <Icon name="alert" />
+              <p data-scope-warning-text></p>
+            </div>
+          </div>
+        </section>
+
+        <form class="settings__form" data-config-form novalidate>
+          <fieldset class="settings__fieldset" data-config-fieldset disabled>
+            <legend class="visually-hidden">Workspace configuration</legend>
+
+            <!-- Workspace -->
+            <section class="section" id="workspace" aria-labelledby="workspace-title">
+              <div class="section__intro">
+                <h2 class="section__title" id="workspace-title">Workspace</h2>
+                <p class="section__text">
+                  The repository that runs the VM workflow. If it does not exist, saving creates it from the <a href={ENGINE_URL} target="_blank" rel="noopener noreferrer">{ENGINE_OWNER}/{ENGINE_REPO}</a> template.
+                </p>
+              </div>
+              <div class="section__body">
+                <label class="field">
+                  <span class="field__label">Repository <span class="field__meta" data-repo-state></span></span>
+                  <span class="input-group">
+                    <span class="input-prefix" data-owner-prefix>owner/</span>
+                    <input class="input input--mono" name="repo" data-repo-input value={DEFAULT_WORKSPACE_REPO} required pattern="[A-Za-z0-9_.\-]{1,100}" autocomplete="off" spellcheck="false" aria-describedby="repo-hint" />
+                  </span>
+                  <span class="field__hint" id="repo-hint">Letters, numbers, dots, hyphens and underscores.</span>
+                  <span class="field__error" data-error-for="repo" hidden></span>
+                </label>
+
+                <div class="field" role="radiogroup" aria-labelledby="visibility-label">
+                  <span class="field__label" id="visibility-label">Visibility <span class="field__meta" data-visibility-state></span></span>
+                  <div class="choices">
+                    <label class="choice">
+                      <input type="radio" name="visibility" value="private" checked />
+                      <span class="choice__title">Private</span>
+                      <span class="choice__body">The endpoint and workflow logs are visible to you and collaborators only. Actions minutes count against your plan.</span>
+                    </label>
+                    <label class="choice">
+                      <input type="radio" name="visibility" value="public" />
+                      <span class="choice__title">Public</span>
+                      <span class="choice__body">Anyone can read the RDP endpoint from the control branch and the workflow annotations.</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="notice notice--warn" data-public-notice hidden>
+                  <Icon name="globe" />
+                  <div>
+                    <p><strong>A public workspace publishes your RDP endpoint.</strong> The reference Windows image has a passwordless account and ngrok does not authenticate RDP clients, so anyone who reads the address can try to connect.</p>
+                    <p>Before starting a public instance, set a strong Windows password through a trusted connection. Secrets stay encrypted in either case.</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Credentials -->
+            <section class="section" id="credentials" aria-labelledby="credentials-title">
+              <div class="section__intro">
+                <h2 class="section__title" id="credentials-title">Credentials</h2>
+                <p class="section__text">Both tokens are required. They are encrypted in the browser with the repository's public key (libsodium sealed box) and stored as Actions secrets. GitHub never returns them, so leave a field empty to keep the stored value.</p>
+              </div>
+              <div class="section__body">
+                <label class="field">
+                  <span class="field__label">ngrok authtoken <span class="field__meta" data-secret-state="ngrok">Checking</span></span>
+                  <input class="input input--mono" type="password" name="ngrok" data-ngrok-input autocomplete="off" spellcheck="false" aria-describedby="ngrok-hint" />
+                  <span class="field__hint" id="ngrok-hint">Stored as <code>{SECRET_NGROK}</code>. Not kept in the browser. Find it in the <a href="https://dashboard.ngrok.com/get-started/your-authtoken" target="_blank" rel="noopener noreferrer">ngrok dashboard</a>.</span>
+                  <span class="field__error" data-error-for="ngrok" hidden></span>
+                </label>
+
+                <label class="field">
+                  <span class="field__label">Hugging Face token <span class="field__meta" data-secret-state="hf">Checking</span></span>
+                  <input class="input input--mono" type="password" name="hf" data-hf-input autocomplete="off" spellcheck="false" aria-describedby="hf-hint" />
+                  <span class="field__hint" id="hf-hint">Stored as <code>{SECRET_HF}</code>. Needs permission to create and write datasets. Create one in <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener noreferrer">Hugging Face settings</a>.</span>
+                  <span class="field__error" data-error-for="hf" hidden></span>
+                </label>
+
+                <div class="keep">
+                  <label class="check">
+                    <input type="checkbox" name="keepHf" data-keep-hf checked />
+                    Keep the Hugging Face token in this tab
+                  </label>
+                  <p class="field__hint">Used to show layer details on the panel and to delete the dataset. Cleared when the tab closes or you sign out. <span data-hf-kept></span></p>
+                </div>
+
+                <label class="field">
+                  <span class="field__label">Hugging Face dataset <span class="field__meta">owner/name, private</span></span>
+                  <span class="input-group">
+                    <input class="input input--mono" name="dataset" data-dataset-input placeholder="username/windows-golden-instance-layers" pattern="[A-Za-z0-9_.\-]+/[A-Za-z0-9_.\-]+" autocomplete="off" spellcheck="false" aria-describedby="dataset-hint" />
+                    <button class="btn" type="button" data-dataset-default>Use default</button>
+                  </span>
+                  <span class="field__hint" id="dataset-hint">Saved as the <code>{VAR_HF_REPO}</code> variable. If empty, the engine uses <code>&lt;hf-user&gt;/&lt;repository&gt;-layers</code> and creates it as private on the first run.</span>
+                  <span class="field__error" data-error-for="dataset" hidden></span>
+                </label>
+              </div>
+            </section>
+
+            <!-- Network -->
+            <section class="section" id="network" aria-labelledby="network-title">
+              <div class="section__intro">
+                <h2 class="section__title" id="network-title">Network</h2>
+                <p class="section__text">Restricting which addresses can reach the RDP tunnel depends on the engine version in your workspace.</p>
+              </div>
+              <div class="section__body">
+                <div class="notice notice--info" data-network-state="unknown">
+                  <Icon name="info" />
+                  <p data-network-text>Choose a workspace to check what its workflow supports.</p>
+                </div>
+                <label class="field" data-cidr-field hidden>
+                  <span class="field__label">Allowed client address <span class="field__meta" data-cidr-state></span></span>
+                  <input class="input input--mono" name="cidr" data-cidr-input placeholder="203.0.113.10/32" autocomplete="off" spellcheck="false" aria-describedby="cidr-hint" />
+                  <span class="field__hint" id="cidr-hint">Saved as the <code>{VAR_RDP_CIDR}</code> variable. A single IPv4 address with a <code>/32</code> suffix.</span>
+                  <span class="field__error" data-error-for="cidr" hidden></span>
+                </label>
+              </div>
+            </section>
+
+            <div class="savebar">
+              <div class="savebar__status" data-save-status role="status" aria-live="polite"></div>
+              <button class="btn btn--primary" type="submit" data-save>
+                <Icon name="check" /> <span data-save-label>Save configuration</span>
+              </button>
+            </div>
+          </fieldset>
+        </form>
+
+        <!-- Validation -->
+        <section class="section" id="validation" aria-labelledby="validation-title">
+          <div class="section__intro">
+            <h2 class="section__title" id="validation-title">Validation</h2>
+            <p class="section__text">Checks the workspace against what the VM workflow needs, using the GitHub and Hugging Face APIs.</p>
+          </div>
+          <div class="section__body">
+            <ul class="checks" data-checks aria-live="polite">
+              <li class="checks__empty">Sign in and choose a workspace to validate it.</li>
+            </ul>
+            <div>
+              <button class="btn" type="button" data-validate disabled>
+                <Icon name="refresh" /> Run validation
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Danger zone -->
+        <section class="section danger" id="danger" aria-labelledby="danger-title">
+          <div class="section__intro">
+            <h2 class="section__title" id="danger-title">Danger zone</h2>
+            <p class="section__text">These operations cannot be undone.</p>
+          </div>
+          <div class="section__body">
+            <div class="danger__item">
+              <div class="danger__text">
+                <h3>Delete persistent data</h3>
+                <p>Permanently deletes the Hugging Face dataset: every saved layer, UEFI and TPM state. The next session boots a clean Golden Image. The instance must be off.</p>
+                <p class="danger__target">Dataset: <code data-danger-dataset>Unknown</code></p>
+                <label class="field danger__token" data-danger-token-field hidden>
+                  <span class="field__label">Hugging Face token with delete permission</span>
+                  <input class="input input--mono" type="password" data-danger-token autocomplete="off" spellcheck="false" />
+                  <span class="field__hint">Used once for this request and not stored.</span>
+                </label>
+              </div>
+              <button class="btn btn--danger" type="button" data-delete-dataset disabled>
+                <Icon name="trash" /> Delete dataset
+              </button>
+            </div>
+            <div class="danger__item">
+              <div class="danger__text">
+                <h3>Forget this workspace on this browser</h3>
+                <p>Clears the selected repository and the panel log stored in this browser. The repository, secrets and dataset are not changed.</p>
+              </div>
+              <button class="btn btn--danger" type="button" data-forget disabled>Forget workspace</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+</BaseLayout>
+
+<script>
+  import { initShell } from '../scripts/shell';
+  import { initSettings } from '../scripts/settings';
+  initShell();
+  initSettings();
+</script>

@@ -1,0 +1,341 @@
+---
+/**
+ * Infrastructure diagram. Every box and label corresponds to a component in
+ * the engine repository (workflow steps, scripts) or the panel.
+ * Gold paths carry the user's session (RDP); grey paths are control traffic.
+ */
+---
+
+<figure class="arch">
+  <div class="arch__scroll" tabindex="0" role="region" aria-label="Architecture diagram, scrollable">
+    <svg class="arch__svg" viewBox="0 0 1200 640" role="img" aria-labelledby="arch-title arch-desc">
+      <title id="arch-title">Windows Golden architecture</title>
+      <desc id="arch-desc">
+        The panel in your browser signs in through a Cloudflare Worker relay and controls a workspace repository through the GitHub API.
+        Dispatching the workflow starts a GitHub-hosted runner, which restores the Golden Image from GitHub Releases or the Actions cache,
+        restores saved layers from a private Hugging Face dataset, boots Windows under QEMU and KVM, and opens an ngrok TCP tunnel.
+        The runner publishes the endpoint to session.json on the golden-control branch, which the panel reads. Your RDP client connects through the ngrok edge.
+        On shutdown the session overlay is compressed and saved back to the dataset.
+      </desc>
+
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M1 1.5L9 5L1 8.5" fill="none" stroke="var(--a-line)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path>
+        </marker>
+        <marker id="arrow-gold" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M1 1.5L9 5L1 8.5" fill="none" stroke="var(--a-gold)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path>
+        </marker>
+        <pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <line x1="0" y1="0" x2="0" y2="6" stroke="var(--a-hatch)" stroke-width="1"></line>
+        </pattern>
+      </defs>
+
+      <!-- Zone labels -->
+      <g class="arch__zone">
+        <text x="40" y="28">Your computer</text>
+        <text x="330" y="28">Control plane</text>
+        <text x="630" y="28">GitHub-hosted runner, ubuntu-latest</text>
+      </g>
+
+      <!-- Your computer -->
+      <g class="arch__node">
+        <rect x="40" y="44" width="220" height="112" rx="3"></rect>
+        <text class="t-title" x="58" y="72">Golden Panel</text>
+        <text class="t-sub" x="58" y="92">Astro static site, GitHub Pages</text>
+        <text class="t-mono" x="58" y="118">/panel  /settings</text>
+        <text class="t-sub" x="58" y="140">Token kept in the browser tab</text>
+      </g>
+      <g class="arch__node arch__node--gold">
+        <rect x="40" y="508" width="220" height="92" rx="3"></rect>
+        <text class="t-title" x="58" y="536">RDP client</text>
+        <text class="t-sub" x="58" y="556">mstsc, Remmina, Microsoft</text>
+        <text class="t-sub" x="58" y="574">Remote Desktop</text>
+      </g>
+
+      <!-- Control plane -->
+      <g class="arch__node">
+        <rect x="330" y="44" width="230" height="72" rx="3"></rect>
+        <text class="t-title" x="348" y="72">Authentication relay</text>
+        <text class="t-sub" x="348" y="94">Cloudflare Worker, Device Flow</text>
+      </g>
+
+      <g class="arch__node">
+        <rect x="330" y="146" width="230" height="290" rx="3"></rect>
+        <text class="t-title" x="348" y="174">Workspace repository</text>
+        <text class="t-sub" x="348" y="194">Generated from the Golden template</text>
+        <line class="arch__rule" x1="348" y1="210" x2="542" y2="210"></line>
+        <text class="t-mono" x="348" y="234">windows-persistent.yml</text>
+        <text class="t-sub" x="348" y="252">workflow_dispatch, cancel</text>
+        <text class="t-mono" x="348" y="282">NGROK_AUTHTOKEN, HF_TOKEN</text>
+        <text class="t-sub" x="348" y="300">Actions secrets, sealed with libsodium</text>
+        <text class="t-mono" x="348" y="330">Golden shutdown &lt;run&gt;</text>
+        <text class="t-sub" x="348" y="348">Issue, graceful shutdown request</text>
+        <text class="t-mono" x="348" y="378">golden-control/session.json</text>
+        <text class="t-sub" x="348" y="396">run_id and RDP endpoint</text>
+        <text class="t-sub" x="348" y="420">Read by the panel, checked per run</text>
+      </g>
+
+      <g class="arch__node arch__node--gold">
+        <rect x="330" y="508" width="230" height="92" rx="3"></rect>
+        <text class="t-title" x="348" y="536">ngrok edge</text>
+        <text class="t-mono" x="348" y="558">tcp://N.tcp.ngrok.io:PORT</text>
+        <text class="t-sub" x="348" y="578">Public TCP endpoint</text>
+      </g>
+
+      <!-- Runner frame -->
+      <rect class="arch__frame" x="630" y="44" width="530" height="400" rx="4"></rect>
+
+      <!-- VM -->
+      <g class="arch__node arch__node--vm">
+        <rect x="652" y="66" width="250" height="196" rx="3"></rect>
+        <text class="t-title" x="670" y="94">QEMU/KVM</text>
+        <text class="t-sub" x="670" y="114">pc-q35-10.0, OVMF, swtpm TPM 2.0</text>
+        <rect class="arch__win" x="670" y="130" width="214" height="114" rx="2"></rect>
+        <text class="t-title" x="686" y="160">Windows 10</text>
+        <text class="t-sub" x="686" y="180">IoT Enterprise LTSC 2021</text>
+        <text class="t-sub" x="686" y="198">VirtIO SCSI and network</text>
+        <text class="t-mono" x="686" y="228">RDP 3389 to host 3390</text>
+      </g>
+
+      <!-- Disk chain -->
+      <g class="arch__chain">
+        <text class="t-sub" x="930" y="80">Disk chain, QCOW2</text>
+        <g class="arch__node arch__node--gold">
+          <rect x="930" y="90" width="208" height="44" rx="2"></rect>
+          <text class="t-title" x="946" y="117">Session overlay</text>
+          <text class="t-sub" x="1066" y="117">writable</text>
+        </g>
+        <g class="arch__node">
+          <rect x="930" y="142" width="208" height="44" rx="2"></rect>
+          <text class="t-title" x="946" y="169">Saved layers</text>
+          <text class="t-sub" x="1066" y="169">read-only</text>
+        </g>
+        <g class="arch__node arch__node--base">
+          <rect x="930" y="194" width="208" height="68" rx="2"></rect>
+          <rect x="930" y="194" width="208" height="68" rx="2" fill="url(#hatch)" stroke="none"></rect>
+          <text class="t-title" x="946" y="221">Golden Image</text>
+          <text class="t-sub" x="946" y="241">immutable base, 64 GiB virtual</text>
+        </g>
+      </g>
+
+      <!-- Runner services -->
+      <g class="arch__node arch__node--gold">
+        <rect x="652" y="300" width="150" height="122" rx="3"></rect>
+        <text class="t-title" x="668" y="328">ngrok agent</text>
+        <text class="t-mono" x="668" y="350">ngrok tcp 3390</text>
+        <text class="t-sub" x="668" y="374">Publishes the</text>
+        <text class="t-sub" x="668" y="392">endpoint once</text>
+        <text class="t-sub" x="668" y="410">RDP answers</text>
+      </g>
+      <g class="arch__node">
+        <rect x="818" y="300" width="160" height="122" rx="3"></rect>
+        <text class="t-title" x="834" y="328">wait_shutdown.py</text>
+        <text class="t-sub" x="834" y="350">QMP status watch</text>
+        <text class="t-sub" x="834" y="374">Polls shutdown issues</text>
+        <text class="t-sub" x="834" y="392">every 15 s, ACPI</text>
+        <text class="t-sub" x="834" y="410">power-down at 287 min</text>
+      </g>
+      <g class="arch__node">
+        <rect x="994" y="300" width="144" height="122" rx="3"></rect>
+        <text class="t-title" x="1010" y="328">persistence.py</text>
+        <text class="t-sub" x="1010" y="350">Restore chain</text>
+        <text class="t-sub" x="1010" y="374">zstd compress,</text>
+        <text class="t-sub" x="1010" y="392">compare, SHA-256,</text>
+        <text class="t-sub" x="1010" y="410">commit</text>
+      </g>
+
+      <!-- External storage -->
+      <g class="arch__node">
+        <rect x="630" y="508" width="250" height="92" rx="3"></rect>
+        <text class="t-title" x="648" y="536">GitHub Releases</text>
+        <text class="t-sub" x="648" y="556">Image parts, SHA-256, VM state</text>
+        <text class="t-sub" x="648" y="578">Cached with actions/cache</text>
+      </g>
+      <g class="arch__node">
+        <rect x="910" y="508" width="250" height="92" rx="3"></rect>
+        <text class="t-title" x="928" y="536">Hugging Face dataset</text>
+        <text class="t-sub" x="928" y="556">Private, layers/&lt;id&gt;/ and</text>
+        <text class="t-mono" x="928" y="578">latest.json</text>
+      </g>
+
+      <!-- Control paths -->
+      <g class="arch__path">
+        <path d="M260 80 H330" marker-end="url(#arrow)"></path>
+        <path d="M260 124 H296 V230 H330" marker-end="url(#arrow)"></path>
+        <path d="M560 234 H600 V140 H630" marker-end="url(#arrow)"></path>
+        <path d="M898 300 V282 H596 V330 H560" marker-end="url(#arrow)"></path>
+        <path d="M652 400 H612 V380 H560" marker-end="url(#arrow)"></path>
+        <path d="M755 508 V474 H986 V282 H916 V236 H930" marker-end="url(#arrow)" class="arch__path--dash"></path>
+        <path d="M1035 508 V422" marker-end="url(#arrow)" marker-start="url(#arrow)"></path>
+        <path d="M902 112 H930" class="arch__path--plain"></path>
+      </g>
+      <g class="arch__labels">
+        <text x="270" y="72">sign in</text>
+        <text x="290" y="200" text-anchor="end">REST API</text>
+        <text x="566" y="132">dispatch</text>
+        <text x="566" y="320">poll issues</text>
+        <text x="572" y="372">publish</text>
+        <text x="764" y="468">image on cache miss</text>
+        <text x="1044" y="470">restore, save</text>
+      </g>
+
+      <!-- Session path (RDP) -->
+      <g class="arch__path arch__path--gold">
+        <path d="M260 554 H330" marker-end="url(#arrow-gold)" marker-start="url(#arrow-gold)"></path>
+        <path d="M560 554 H600 V460 H727 V422" marker-end="url(#arrow-gold)" marker-start="url(#arrow-gold)"></path>
+        <path d="M727 300 V262" marker-end="url(#arrow-gold)" marker-start="url(#arrow-gold)"></path>
+      </g>
+      <g class="arch__labels arch__labels--gold">
+        <text x="270" y="546">RDP</text>
+        <text x="606" y="452">TCP tunnel</text>
+      </g>
+    </svg>
+  </div>
+  <figcaption class="arch__legend">
+    <span><i class="arch__key arch__key--gold"></i>Remote Desktop session</span>
+    <span><i class="arch__key"></i>Control and storage traffic</span>
+    <span><i class="arch__key arch__key--dash"></i>Only when the image cache misses</span>
+  </figcaption>
+</figure>
+
+<style>
+  .arch {
+    --a-line: #6b7078;
+    --a-gold: var(--c-gold);
+    --a-hatch: rgba(205, 181, 126, 0.12);
+    margin: 0;
+    border: 1px solid var(--c-line);
+    border-radius: var(--r-frame);
+    background:
+      linear-gradient(var(--c-line-faint) 1px, transparent 1px) 0 0 / 24px 24px,
+      linear-gradient(90deg, var(--c-line-faint) 1px, transparent 1px) 0 0 / 24px 24px,
+      var(--c-ink);
+  }
+
+  .arch__scroll {
+    overflow-x: auto;
+    padding: var(--s-4) var(--s-2) var(--s-2);
+    border-radius: var(--r-frame) var(--r-frame) 0 0;
+  }
+
+  .arch__svg {
+    display: block;
+    width: 100%;
+    min-width: 900px;
+    height: auto;
+    font-family: var(--f-sans);
+  }
+
+  .arch__zone text {
+    fill: var(--c-muted);
+    font-size: 12px;
+    font-weight: 520;
+  }
+
+  .arch__node rect {
+    fill: var(--c-surface);
+    stroke: var(--c-line-strong);
+    stroke-width: 1;
+  }
+
+  .arch__node--gold rect {
+    stroke: var(--c-gold-line);
+  }
+
+  .arch__node--vm > rect {
+    fill: var(--c-raised);
+  }
+
+  .arch__node--base rect:first-child {
+    fill: #201e19;
+    stroke: var(--c-gold-deep);
+  }
+
+  .arch__win {
+    fill: var(--c-sunken) !important;
+    stroke: var(--c-gold) !important;
+  }
+
+  .arch__frame {
+    fill: rgba(255, 255, 255, 0.012);
+    stroke: var(--c-line-strong);
+    stroke-dasharray: 4 4;
+  }
+
+  .arch__rule {
+    stroke: var(--c-line);
+  }
+
+  .t-title {
+    fill: var(--c-text);
+    font-size: 14px;
+    font-weight: 620;
+  }
+
+  .t-sub {
+    fill: var(--c-muted);
+    font-size: 11.5px;
+  }
+
+  .t-mono {
+    fill: var(--c-text-2);
+    font-family: var(--f-mono);
+    font-size: 11px;
+  }
+
+  .arch__path path {
+    fill: none;
+    stroke: var(--a-line);
+    stroke-width: 1.3;
+    stroke-linejoin: round;
+  }
+
+  .arch__path--dash {
+    stroke-dasharray: 5 4;
+  }
+
+  .arch__path--gold path {
+    stroke: var(--a-gold);
+    stroke-width: 1.6;
+  }
+
+  .arch__labels text {
+    fill: var(--c-muted);
+    font-size: 11px;
+  }
+
+  .arch__labels--gold text {
+    fill: var(--c-gold);
+  }
+
+  .arch__legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-2) var(--s-6);
+    padding: var(--s-3) var(--s-5);
+    border-top: 1px solid var(--c-line);
+    font-size: var(--t-xs);
+    color: var(--c-muted);
+  }
+
+  .arch__legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-2);
+  }
+
+  .arch__key {
+    display: inline-block;
+    width: 22px;
+    height: 2px;
+    background: #6b7078;
+  }
+
+  .arch__key--gold {
+    background: var(--c-gold);
+  }
+
+  .arch__key--dash {
+    background: repeating-linear-gradient(90deg, #6b7078 0 5px, transparent 5px 9px);
+  }
+</style>

@@ -1,0 +1,63 @@
+---
+import '@fontsource-variable/schibsted-grotesk/wght.css';
+import '@fontsource-variable/jetbrains-mono/wght.css';
+import '../styles/global.css';
+import Topbar from '../components/Topbar.astro';
+import ConfirmDialog from '../components/ConfirmDialog.astro';
+import type { PageKey } from '../lib/paths';
+import { AUTH_URL } from '../lib/config';
+
+interface Props {
+  title: string;
+  description: string;
+  page: PageKey;
+  /** App pages render the signed-in identity in the header. */
+  app?: boolean;
+  bodyClass?: string;
+}
+
+const { title, description, page, app = false, bodyClass } = Astro.props;
+
+let authOrigin = '';
+try {
+  authOrigin = AUTH_URL ? new URL(AUTH_URL).origin : '';
+} catch {
+  authOrigin = '';
+}
+
+// Applied to production builds only: the dev server injects inline scripts.
+const csp = [
+  "default-src 'self'",
+  "script-src 'self' 'wasm-unsafe-eval'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: https://avatars.githubusercontent.com",
+  "font-src 'self'",
+  `connect-src 'self' https://api.github.com https://huggingface.co${authOrigin ? ` ${authOrigin}` : ''}`,
+  "object-src 'none'",
+  "base-uri 'none'",
+  "form-action 'none'",
+].join('; ');
+const fullTitle = page === 'home' ? title : `${title} | Windows Golden`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {import.meta.env.PROD && <meta http-equiv="Content-Security-Policy" content={csp} />}
+    <meta name="referrer" content="no-referrer" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#17191c" />
+    <meta name="description" content={description} />
+    <title>{fullTitle}</title>
+    <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`} />
+  </head>
+  <body class={bodyClass} data-page={page}>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Topbar page={page} app={app} />
+    <slot />
+    <div class="toasts" id="toasts" aria-live="polite"></div>
+    <ConfirmDialog />
+  </body>
+</html>

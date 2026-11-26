@@ -1,0 +1,22 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { href } from '../lib/paths';
+import '../styles/app.css';
+---
+
+<BaseLayout title="Page not found" description="This page does not exist." page="home">
+  <main id="main" class="app" tabindex="-1">
+    <section class="gate">
+      <div class="gate__card frame">
+        <div class="frame__body gate__body">
+          <h1 class="gate__title">Page not found</h1>
+          <p class="gate__text">The address does not match a page of the panel.</p>
+          <div class="gate__actions">
+            <a class="btn btn--primary" href={href('/panel/')}>Open the panel</a>
+            <a class="btn" href={href('/')}>Overview</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</BaseLayout>

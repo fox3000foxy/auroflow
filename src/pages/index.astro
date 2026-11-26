@@ -1,38 +1,284 @@
 ---
-import '../styles/global.css';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ArchitectureDiagram from '../components/ArchitectureDiagram.astro';
+import Icon from '../components/Icon.astro';
+import { href } from '../lib/paths';
+import { ENGINE_URL, PANEL_URL, SPEC, AUTO_SHUTDOWN_MIN, WORKFLOW_TIMEOUT_MIN } from '../lib/config';
+import '../styles/home.css';
+
+// Reference values published in the engine README (System specifications,
+// Disk optimization, Observed benchmarks). Kept verbatim; not measured here.
+const specs = [
+  ['Operating system', SPEC.os],
+  ['Version and build', `${SPEC.version}, build ${SPEC.build}`],
+  ['Architecture', 'x86-64, English (United States)'],
+  ['Virtual disk', `${SPEC.virtualDisk} QCOW2, 64 KiB clusters`],
+  ['Image file', '4.82 GiB, Zstandard compressed'],
+  ['Firmware', 'UEFI (OVMF) with emulated TPM 2.0'],
+  ['Machine', `QEMU/KVM, ${SPEC.machine}, host CPU passthrough`],
+  ['Devices', 'VirtIO SCSI, VirtIO network, memory balloon'],
+];
+
+const benchmarks = [
+  ['Golden Image preparation, cold cache', '52.79 s'],
+  ['GitHub cache restoration', 'about 39 s'],
+  ['Golden Image preparation after cache restore', '3.46 s'],
+  ['First persistent layer backup', 'about 17 s'],
+];
+
+const lifecycle = [
+  {
+    title: 'Start',
+    body: 'The panel dispatches windows-persistent.yml in your workspace repository. It refuses to launch a second run while one is active or queued.',
+  },
+  {
+    title: 'Prepare the runner',
+    body: 'A GitHub-hosted Ubuntu runner installs QEMU, OVMF and swtpm, checks that /dev/kvm is available, and connects to your Hugging Face dataset, creating it as private if needed.',
+  },
+  {
+    title: 'Restore the Golden Image',
+    body: 'The image is restored from the Actions cache, or downloaded in parallel parts from the engine release, then verified against its SHA-256 and with qemu-img check.',
+  },
+  {
+    title: 'Rebuild the disk chain',
+    body: 'Saved layers are downloaded and checked against their manifest. A new, empty writable overlay is created on top of the chain.',
+  },
+  {
+    title: 'Boot and open the tunnel',
+    body: 'Windows boots with its saved UEFI and TPM state. Once Remote Desktop answers, ngrok opens a TCP tunnel and the endpoint is written to session.json on the golden-control branch.',
+  },
+  {
+    title: 'Work',
+    body: `The panel shows the endpoint for the current run only. The session ends when you shut down Windows, request a shutdown from the panel, or after ${AUTO_SHUTDOWN_MIN} minutes.`,
+  },
+  {
+    title: 'Save',
+    body: 'After a confirmed clean QEMU and TPM stop, the overlay is compressed with Zstandard, compared against the original, checksummed and committed to the dataset with the UEFI and TPM state.',
+  },
+];
+
+const steps = [
+  {
+    title: 'Prepare three accounts',
+    body: 'A GitHub account, an ngrok account for its authtoken, and a Hugging Face account with a token that can create and write datasets.',
+  },
+  {
+    title: 'Sign in',
+    body: 'Open Settings and sign in with GitHub. You confirm a short code on github.com; no password is entered in the panel.',
+  },
+  {
+    title: 'Create the workspace',
+    body: 'Choose a repository name and its visibility. Saving creates it from the Golden template and stores both tokens as encrypted Actions secrets.',
+  },
+  {
+    title: 'Secure Windows',
+    body: 'The reference image has a passwordless account. Set a strong password in your first session before relying on the endpoint, especially with a public workspace.',
+  },
+  {
+    title: 'Start and connect',
+    body: 'Start the instance from the panel. When the status turns ON, copy the endpoint into your RDP client without the tcp:// prefix.',
+  },
+  {
+    title: 'Shut down to save',
+    body: 'Shut down from the Start menu or the panel, then wait until Saving finishes. Force stop cancels the run and discards the session.',
+  },
+];
 ---
-<html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Golden / Console</title></head><body>
-<header><a class="brand" href="#"><span class="mark">G</span> golden<span class="muted"> / console</span></a><span id="identity" class="muted">Not connected</span><button id="logout" hidden>Sign out</button></header>
-<main><aside><p class="eyebrow">WORKSPACE</p><a href="#overview">Overview</a><a href="#configuration">Configuration</a><a href="#activity">Activity</a><a href="https://github.com/fox3000foxy/windows10-golden">Source repository</a></aside><article>
-<section id="login"><p class="eyebrow">REMOTE WORKSPACE</p><h1>Your Windows instance.</h1><p>Provision and manage a persistent Windows workspace using your own accounts.</p><button class="primary" id="connect">Connect GitHub</button><div id="device" hidden><p>Enter this code on GitHub:</p><strong id="code"></strong><p><a href="https://github.com/login/device" target="_blank" rel="noopener">Open GitHub device login</a></p></div></section>
-<div id="dashboard" hidden><section id="overview"><p class="eyebrow">INSTANCE / 01</p><div class="line"><h1>Windows 10</h1><span class="status" id="status">Unknown</span></div><p>IoT Enterprise LTSC 2021 / Golden Image</p><div class="metrics"><div><small>DISK</small><strong>64 GiB</strong></div><div><small>COMPUTE</small><strong>GitHub runner</strong></div><div><small>STORAGE</small><strong>Hugging Face</strong></div></div><div class="connection"><small>REMOTE DESKTOP</small><p id="address">No active endpoint</p><button id="copy" disabled>Copy address</button> <a id="runlink" hidden target="_blank" rel="noopener">View workflow</a></div><div class="actions"><button class="primary" id="start" disabled>Start instance</button><button id="stop" disabled>Request shutdown</button><button id="force" disabled>Force stop</button><button id="refresh">Refresh</button></div></section>
-<section id="configuration"><p class="eyebrow">CONFIGURATION</p><h2>Provision workspace</h2><p>Use a private repository and dedicated, restricted service tokens.</p><form id="setup"><label>Repository name<input id="repo" value="windows-golden-instance" pattern="[A-Za-z0-9_.-]+" required/></label><label>ngrok authtoken<input id="ngrok" type="password" autocomplete="off" required/></label><label>Hugging Face token<input id="hf" type="password" autocomplete="off" required/></label><label>Private Hugging Face dataset (owner/name)<input id="dataset" placeholder="username/windows-golden-instance-layers" required pattern="[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+"/></label><label>RDP allowed public IP (CIDR)<input id="cidr" placeholder="203.0.113.10/32" required/></label><button class="primary">Create / configure workspace</button></form><div class="danger"><h3>Reset persistent data</h3><p>Deletes the configured Hugging Face dataset. Stop the instance first.</p><button id="reset" disabled>Delete persistent data</button></div></section><section id="activity"><p class="eyebrow">ACTIVITY</p><pre id="events" aria-live="polite"></pre></section></div><p id="message" role="status"></p></article></main><footer>Golden / Independent project. Use only authorized infrastructure and licensed images.</footer>
-<script>
-import sodium from 'libsodium-wrappers';
-const $=(id:string)=>document.getElementById(id)!;
-const input=(id:string)=>$(id) as HTMLInputElement;
-const button=(id:string)=>$(id) as HTMLButtonElement;
-let token='', owner='', repo='', run:any=null, endpoint='', configured=false, busy=false;
-const auth=import.meta.env.PUBLIC_AUTH_URL;
-function log(s:string){$('message').textContent=s;$('events').textContent=new Date().toLocaleTimeString()+'  '+s+'\n'+$('events').textContent;}
-async function api(path:string,method='GET',body?:unknown){const r=await fetch('https://api.github.com'+path,{method,headers:{Authorization:'Bearer '+token,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body)});if(!r.ok)throw Error(`${method} ${path}: ${r.status}`);return r.status===204?null:r.json();}
-const root=()=>`/repos/${owner}/${repo}`;
-async function relay(path:string,body:unknown){if(!auth)throw Error('Configure PUBLIC_AUTH_URL first');const r=await fetch(auth+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});if(!r.ok)throw Error('Authentication relay: '+r.status);return r.json();}
-const sleep=(ms:number)=>new Promise(r=>setTimeout(r,ms));
-async function act(fn:()=>Promise<void>){if(busy)return;busy=true;try{await fn()}catch(e){log(String(e))}finally{busy=false;}}
-function active(){return run && !['completed'].includes(run.status)}
-function controls(){button('start').disabled=!configured||!!active();button('force').disabled=!active();button('stop').disabled=!active()||!endpoint;button('reset').disabled=!configured||!!active();button('copy').disabled=!endpoint;}
-async function refresh(){if(!repo)return;const data=await api(root()+'/actions/workflows/windows-persistent.yml/runs?per_page=1');run=data.workflow_runs[0]||null;endpoint='';$('status').textContent=run?run.status+(run.conclusion?' / '+run.conclusion:''):'Ready';const link=$('runlink') as HTMLAnchorElement;link.hidden=!run;if(run)link.href=run.html_url;if(active()){try{const ref=await api(root()+'/git/ref/heads/golden-control');const commit=await api(root()+'/git/commits/'+ref.object.sha);const tree=await api(root()+'/git/trees/'+commit.tree.sha);const entry=tree.tree.find((x:any)=>x.path==='session.json');if(entry){const blob=await api(root()+'/git/blobs/'+entry.sha);const state=JSON.parse(atob(blob.content));if(String(state.run_id)===String(run.id)&&/^[a-zA-Z0-9.-]+:[0-9]+$/.test(state.endpoint))endpoint=state.endpoint;}}catch{}}$('address').textContent=endpoint||'No active endpoint';controls();}
-async function secret(name:string,value:string){await sodium.ready;const key=await api(root()+'/actions/secrets/public-key');const encrypted=sodium.crypto_box_seal(sodium.from_string(value),sodium.from_base64(key.key,sodium.base64_variants.ORIGINAL));await api(root()+'/actions/secrets/'+name,'PUT',{encrypted_value:sodium.to_base64(encrypted,sodium.base64_variants.ORIGINAL),key_id:key.key_id});}
-async function variable(name:string,value:string){try{await api(root()+'/actions/variables/'+name,'PATCH',{name,value})}catch(e){if(!String(e).endsWith(': 404'))throw e;await api(root()+'/actions/variables','POST',{name,value})}}
-button('connect').onclick=()=>act(async()=>{const d=await relay('/device',{});$('device').hidden=false;$('code').textContent=d.user_code;let interval=d.interval||5;const end=Date.now()+d.expires_in*1000;while(Date.now()<end){await sleep(interval*1000);const t=await relay('/token',{device_code:d.device_code});if(t.error==='authorization_pending')continue;if(t.error==='slow_down'){interval+=5;continue}if(!t.access_token)throw Error(t.error||'Authorization failed');token=t.access_token;const user=await api('/user');owner=user.login;$('identity').textContent=owner;$('login').hidden=true;$('dashboard').hidden=false;button('logout').hidden=false;repo=input('repo').value;try{const existing=await api(root());if(existing.private){configured=true;await refresh()}}catch{}return}throw Error('Code expired')});
-button('logout').onclick=()=>location.reload();
-$('setup').addEventListener('submit',e=>{e.preventDefault();void act(async()=>{repo=input('repo').value;configured=false;controls();let existing;try{existing=await api(root())}catch(e){if(!String(e).endsWith(': 404'))throw e;}if(!existing){await api('/repos/fox3000foxy/windows10-golden/generate','POST',{owner,name:repo,private:true,include_all_branches:false});for(let i=0;i<15;i++){try{existing=await api(root());break}catch{await sleep(2000)}}}if(!existing?.private)throw Error('A private workspace is required');await secret('NGROK_AUTHTOKEN',input('ngrok').value);await secret('HF_TOKEN',input('hf').value);await variable('HF_REPO',input('dataset').value);await variable('RDP_ALLOWED_CIDR',input('cidr').value);input('ngrok').value='';input('hf').value='';configured=true;log('Workspace configured');await refresh()})});
-button('refresh').onclick=()=>act(refresh);
-button('start').onclick=()=>act(async()=>{await refresh();if(active())throw Error('Instance already active');const protocol=await api(root()+'/contents/golden-panel-protocol.txt');if(atob(protocol.content).trim()!=='1')throw Error('Compatible engine required');await api(root()+'/actions/workflows/windows-persistent.yml/dispatches','POST',{ref:'main'});log('Start requested');await sleep(3000);await refresh()});
-button('force').onclick=()=>act(async()=>{if(!confirm('Force stop? Unsaved changes may be lost.'))return;await api(root()+`/actions/runs/${run.id}/cancel`,'POST');log('Cancellation requested');await refresh()});
-button('stop').onclick=()=>act(async()=>{if(!active())return;await api(root()+'/issues','POST',{title:`Golden shutdown ${run.id}`,body:'Request graceful shutdown of this run.'});log('Shutdown requested')});
-button('copy').onclick=()=>act(async()=>{await navigator.clipboard.writeText(endpoint);log('Address copied')});
-button('reset').onclick=()=>act(async()=>{await refresh();if(active())throw Error('Stop the instance first');const dataset=(await api(root()+'/actions/variables/HF_REPO')).value;if(prompt('Type '+dataset+' to permanently delete it')!==dataset)return;const hf=prompt('Enter a Hugging Face token authorized to delete this dataset');if(!hf)return;const r=await fetch('https://huggingface.co/api/repos/delete',{method:'DELETE',headers:{Authorization:'Bearer '+hf,'Content-Type':'application/json'},body:JSON.stringify({name:dataset.split('/')[1],organization:dataset.split('/')[0],type:'dataset'})});if(!r.ok)throw Error('Hugging Face deletion: '+r.status);log('Dataset deleted')});
-setInterval(()=>{if(configured&&!busy)void act(refresh)},10000);
-</script></body></html>
+
+<BaseLayout
+  title="Windows Golden | Windows 10 on demand with persistent storage"
+  description="On-demand Windows 10 IoT Enterprise LTSC 2021 virtual machines on GitHub Actions, reachable over RDP and persisted as QCOW2 layers on Hugging Face."
+  page="home"
+  bodyClass="home"
+>
+  <main id="main" tabindex="-1">
+    <section class="hero">
+      <div class="hero__inner">
+        <p class="hero__kicker">Windows 10 IoT Enterprise LTSC 2021 on QEMU/KVM</p>
+        <h1 class="hero__title">Windows that boots on a GitHub runner and keeps its disk between sessions.</h1>
+        <div class="hero__foot">
+          <p class="hero__lede">
+            Windows Golden starts a prepared Windows image on GitHub Actions when you need it, connects you over Remote Desktop through ngrok, and saves what changed as a compressed QCOW2 layer in your own private Hugging Face dataset.
+          </p>
+          <div class="hero__actions">
+            <a class="btn btn--primary btn--lg" href={href('/panel/')}>Open the panel</a>
+            <a class="btn btn--lg" href={ENGINE_URL} target="_blank" rel="noopener noreferrer"><Icon name="github" /> VM engine</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band band--diagram" aria-labelledby="architecture">
+      <div class="band__inner">
+        <header class="band__head">
+          <h2 id="architecture">How the pieces connect</h2>
+          <p>The panel never talks to the VM directly. It drives the workspace repository through the GitHub API, and the runner reports back through the same repository.</p>
+        </header>
+        <ArchitectureDiagram />
+      </div>
+    </section>
+
+    <section class="band" aria-labelledby="what">
+      <div class="band__inner band__inner--split">
+        <header class="band__head">
+          <h2 id="what">What runs</h2>
+          <p>A debloated Windows 10 IoT Enterprise LTSC 2021 installation, prepared once as the Golden Image and published as a release of the engine repository.</p>
+        </header>
+        <div class="split">
+          <div class="prose">
+            <p>
+              Each session runs on a fresh GitHub-hosted runner. QEMU is given every available processor and the free memory minus about 1 GiB. The reference run allocated 4 vCPUs and 13 GiB.
+            </p>
+            <p>
+              The Golden Image is never written to. Your changes land in a writable overlay; at shutdown only that overlay is uploaded, so a session that changed little saves quickly. The engine README reports a 9.0 GiB installation reduced to 4.74 GiB allocated after ReTrim and Zstandard compression, with the full 64 GiB of virtual capacity kept.
+            </p>
+            <p class="prose__note">
+              Figures on this page come from the engine README and its reference runs. Actual performance depends on the runner and your network.
+            </p>
+          </div>
+          <dl class="spec">
+            {specs.map(([k, v]) => (
+              <>
+                <dt>{k}</dt>
+                <dd>{v}</dd>
+              </>
+            ))}
+          </dl>
+        </div>
+      </div>
+    </section>
+
+    <section class="band" aria-labelledby="lifecycle">
+      <div class="band__inner band__inner--split">
+        <header class="band__head">
+          <h2 id="lifecycle">Lifecycle of a session</h2>
+          <p>One workflow run is one session. The panel derives the VM status from the step the run is executing.</p>
+        </header>
+        <ol class="timeline">
+          {lifecycle.map((item, index) => (
+            <li class="timeline__item">
+              <span class="timeline__index" aria-hidden="true">{String(index + 1)}</span>
+              <div>
+                <h3>{item.title}</h3>
+                <p>{item.body}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+
+    <section class="band" aria-labelledby="persistence">
+      <div class="band__inner band__inner--split">
+        <header class="band__head">
+          <h2 id="persistence">Persistence in layers</h2>
+          <p>Every saved session becomes one more read-only layer, backed by the one before it.</p>
+        </header>
+        <div class="split split--even">
+          <div class="stack" aria-label="Disk chain, newest on top">
+            <div class="stack__layer stack__layer--live">
+              <span>Session overlay</span><span>writable, this run</span>
+            </div>
+            <div class="stack__layer"><span>Layer 3</span><span>layers/&lt;id&gt;/disk.qcow2</span></div>
+            <div class="stack__layer"><span>Layer 2</span><span>layers/&lt;id&gt;/disk.qcow2</span></div>
+            <div class="stack__layer"><span>Layer 1</span><span>layers/&lt;id&gt;/disk.qcow2</span></div>
+            <div class="stack__layer stack__layer--base"><span>Golden Image</span><span>pinned in golden.env</span></div>
+          </div>
+          <div class="prose">
+            <p>
+              <code>latest.json</code> in the dataset lists the chain in order with a SHA-256 per layer, and records the checksum of the Golden Image it was built on. A restore stops if any checksum, backing file or the base image does not match.
+            </p>
+            <p>
+              Each layer folder also holds the UEFI variables and TPM state, so Windows sees the same firmware and TPM on every runner. Uploads are committed against the dataset revision read at boot, and the dataset must be private or the engine refuses to read or write it.
+            </p>
+            <p>
+              If Windows or QEMU does not stop cleanly, nothing is saved, to avoid publishing an inconsistent disk. Deleting the dataset from Settings resets the machine to the Golden Image.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band" aria-labelledby="start">
+      <div class="band__inner band__inner--split">
+        <header class="band__head">
+          <h2 id="start">Getting started</h2>
+          <p>Everything is configured from the panel. The first boot also downloads and caches the Golden Image.</p>
+        </header>
+        <div>
+          <ol class="steps">
+            {steps.map((step, index) => (
+              <li class="steps__item">
+                <span class="steps__index" aria-hidden="true">{String(index + 1)}</span>
+                <h3>{step.title}</h3>
+                <p>{step.body}</p>
+              </li>
+            ))}
+          </ol>
+          <div class="cta">
+            <div>
+              <h3>Ready to set up a workspace?</h3>
+              <p>Sign in with GitHub, then create the workspace from Settings.</p>
+            </div>
+            <div class="cta__actions">
+              <a class="btn btn--primary btn--lg" href={href('/settings/')}>Go to settings</a>
+              <a class="btn btn--lg" href={href('/panel/')}>Open the panel</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band" aria-labelledby="security">
+      <div class="band__inner band__inner--split">
+        <header class="band__head">
+          <h2 id="security">Security and limits</h2>
+          <p>Read this before exposing a session.</p>
+        </header>
+        <div class="split split--even">
+          <ul class="facts">
+            <li><strong>Remote Desktop is not authenticated by ngrok.</strong> The ngrok token authorises the tunnel agent, not RDP clients. Anyone with the endpoint can reach the Windows login screen.</li>
+            <li><strong>The reference account has no password.</strong> Set a strong password through a trusted connection before relying on any endpoint.</li>
+            <li><strong>Public workspaces publish the endpoint.</strong> session.json and the workflow annotations are readable by anyone. Use a private repository when you can.</li>
+            <li><strong>Force stop discards the session.</strong> Cancelling the run skips the save step.</li>
+          </ul>
+          <ul class="facts">
+            <li><strong>Tokens stay out of the repository.</strong> They are sealed in the browser with the repository key and stored as Actions secrets. The GitHub token is kept only in the open browser tab.</li>
+            <li><strong>The OAuth scope is broad.</strong> Device Flow requests <code>repo</code> and <code>workflow</code>, which reach all your repositories. A dedicated GitHub account limits the impact.</li>
+            <li><strong>Sessions are time limited.</strong> Runs stop after {WORKFLOW_TIMEOUT_MIN} minutes; the engine powers Windows down at {AUTO_SHUTDOWN_MIN} minutes to leave time for the save.</li>
+            <li><strong>Licensing is yours.</strong> The reference install was activated with MAS, which is not a Windows license. Use runners according to GitHub's terms.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="band" aria-labelledby="numbers">
+      <div class="band__inner band__inner--split">
+        <header class="band__head">
+          <h2 id="numbers">Reference timings</h2>
+          <p>Observed in the reference runs documented by the engine README.</p>
+        </header>
+        <table class="figures">
+          <tbody>
+            {benchmarks.map(([k, v]) => (
+              <tr>
+                <th scope="row">{k}</th>
+                <td>{v}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__inner">
+      <div class="footer__links">
+        <a href={ENGINE_URL} target="_blank" rel="noopener noreferrer"><Icon name="github" /> fox3000foxy/windows10-golden</a>
+        <a href={PANEL_URL} target="_blank" rel="noopener noreferrer"><Icon name="github" /> fox3000foxy/windows-golden-panel</a>
+      </div>
+      <p>Independent project, not affiliated with Microsoft, GitHub, ngrok or Hugging Face. Use only infrastructure you are authorised to use and properly licensed images.</p>
+    </div>
+  </footer>
+</BaseLayout>

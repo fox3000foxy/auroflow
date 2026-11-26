@@ -1,15 +1,106 @@
-# Golden Panel
+# Windows Golden Panel
 
-Astro static frontend prototype. No tokens are persisted in browser storage. GitHub OAuth tokens remain in memory until reload. GitHub secrets are sealed using libsodium.
+Static web application for [Windows Golden](https://github.com/fox3000foxy/windows10-golden): on-demand Windows 10 IoT Enterprise LTSC 2021 virtual machines running under QEMU/KVM on GitHub Actions, reachable over RDP through ngrok, with persistent storage as compressed QCOW2 layers in a private Hugging Face dataset.
 
-## Setup
+The panel has no backend of its own. It talks to the GitHub REST API and the Hugging Face API directly from the browser. A small Cloudflare Worker (`worker/`) relays GitHub Device Flow, because GitHub's OAuth endpoints do not accept browser CORS requests.
 
-Create a GitHub OAuth App and enable Device Flow. Set its client ID in worker/wrangler.toml. Deploy the relay with `cd worker && npx wrangler deploy`. Set PUBLIC_AUTH_URL in a local .env or GitHub repository Actions variable. Enable GitHub Pages with GitHub Actions as source. Run npm install and npm run dev locally.
+## Pages
 
-The OAuth scope repo is broad and grants access beyond the workspace; a narrowly scoped GitHub App is preferable for production. The relay needs rate limiting. The HF deletion endpoint and browser CORS need integration testing. The panel asks for the HF token again for deletion because GitHub secrets cannot be read back.
+| Path | Purpose |
+|---|---|
+| `/` | Project overview: what runs, architecture diagram, session lifecycle, persistence, getting started, security notes. |
+| `/panel/` | VM dashboard: status, RDP endpoint, start, graceful shutdown, force stop, lifecycle, activity, compute and storage. |
+| `/settings/` | Sign-in, workspace repository and visibility, ngrok and Hugging Face credentials, network restriction, validation, danger zone. |
 
-## Engine integration required
+## How the panel reads VM state
 
-Start is deliberately blocked until the engine has a golden-panel-protocol.txt file containing 1. Do not add that marker until the engine enforces authenticated RDP and an IP allowlist, publishes session.json on the private golden-control branch with run_id and endpoint, and polls authenticated shutdown requests (issues titled Golden shutdown RUN_ID, validating author and run ID). Enable issues on the private workspace if using this protocol. The engine must shut down via QMP and save persistence before completing. Force cancellation can lose data. Require a licensed image and an authorized runner workload. The current engine is not modified by this archive.
+The VM status is derived from the steps of the active workflow run (`GET /actions/runs/{id}/jobs`), not from the run status alone:
 
-This is an untested integration scaffold, not a production deployment. Use a dedicated GitHub account or replace broad OAuth scopes before public release.
+| Status | Condition |
+|---|---|
+| OFF (red) | No queued or running run. |
+| Booting... (yellow) | Start requested, run queued, or any step before *Wait for shutdown*. The detail line names the current step. |
+| ON (green) | *Wait for shutdown* is running and `session.json` on `golden-control` belongs to this run. |
+| Shutting down... (orange) | A `Golden shutdown <run_id>` issue exists for this run, or the run is finishing. |
+| Saving... (blue) | *Save persistent layers* is running. |
+| Stopping... (orange) | Force stop was requested from this browser. |
+
+The endpoint is displayed only when `session.json` has the current `run_id` and a valid `host:port`. Endpoints of completed or cancelled runs are never shown. The panel distinguishes a missing control branch, a stale session from another run, a malformed file and an API error, and shows each differently. GitHub Actions status is kept as secondary information in its own panel.
+
+Polling runs every 5 to 6 seconds during transitions and every 15 seconds while ON. It stops while the instance is off and while the tab is hidden, backs off on errors, and stops on authentication errors. Requests use `cache: 'no-cache'` so GitHub's 60-second `Cache-Control` never shows a stale state; unchanged resources answer 304, which does not count against the rate limit.
+
+Duplicate launches are prevented by checking for active runs before dispatching and by a cross-tab dispatch lock held until the new run appears (or for two minutes).
+
+## Credential handling
+
+- **GitHub token**: kept in `sessionStorage`, scoped to the browser tab, expires after 8 hours of inactivity. Users can opt in to "Stay signed in on this browser", which keeps it in `localStorage` for up to 7 days. Sign-out clears both.
+- **ngrok token**: sealed in the browser with the repository public key (libsodium `crypto_box_seal`) and stored as the `NGROK_AUTHTOKEN` Actions secret. Never stored in the browser.
+- **Hugging Face token**: sealed into the `HF_TOKEN` secret. Optionally kept in `sessionStorage` (on by default, clearable) so the panel can show layer details and delete the dataset without asking again.
+- Storage keys are namespaced (`golden-panel.v2.*`), because every GitHub Pages project of an account shares the `<user>.github.io` origin. Unnamespaced keys from the first prototype are removed on load.
+- Credentials never appear in URLs, logs or rendered HTML. API error messages strip query strings and never include headers.
+- Production builds set a Content-Security-Policy that forbids inline scripts and limits network access to GitHub, Hugging Face and the configured relay. `'wasm-unsafe-eval'` is allowed for libsodium.
+
+The OAuth scopes requested by the worker (`repo workflow`) reach all of the user's repositories. A dedicated GitHub account, or a GitHub App with repository-scoped permissions, limits the impact.
+
+## Public workspaces
+
+Public repositories are supported. `session.json` and the workflow annotations are then readable by anyone, and the reference image has a passwordless account. The panel warns on the settings page, asks for confirmation before creating a public workspace or changing visibility, shows a persistent warning on the dashboard and confirms before starting a public instance.
+
+## Development
+
+Requirements: Node.js 22.
+
+```bash
+npm install
+cp .env.example .env    # set PUBLIC_AUTH_URL to your deployed worker
+npm run dev             # http://localhost:4321/windows-golden-panel/
+```
+
+| Command | Action |
+|---|---|
+| `npm run dev` | Development server. The CSP is not applied in development. |
+| `npm run check` | Astro and TypeScript diagnostics. |
+| `npm test` | Unit tests (Vitest) for state derivation, session parsing and helpers. |
+| `npm run build` | Production build to `dist/`. |
+| `npm run preview` | Serve the production build on port 4321. |
+
+The worker accepts requests from `PANEL_ORIGIN` and `http://localhost:4321`, so both `dev` and `preview` can sign in against the deployed relay.
+
+### Project structure
+
+```
+src/
+  components/   Topbar, Icon set, DeviceLogin, ConfirmDialog, ArchitectureDiagram
+  layouts/      BaseLayout (head, CSP, fonts, toasts, dialog)
+  lib/          config, paths, storage, errors, github, huggingface, relay,
+                session, vm-state (pure), vm-controller, poller, workspace, ui, format
+  pages/        index, panel, settings, 404
+  scripts/      Client entry points per page
+  styles/       tokens.css, global.css, app.css, home.css, panel.css, settings.css
+tests/          Vitest unit tests
+worker/         Cloudflare Worker for Device Flow (unchanged)
+```
+
+Integration constants (workflow file name, step names, branch, issue title, secret and variable names) live in `src/lib/config.ts` and `src/lib/vm-state.ts`. Update them there if the engine changes.
+
+## Deployment
+
+1. Create a GitHub OAuth App, enable Device Flow, and set its client ID in `worker/wrangler.toml`.
+2. Set `PANEL_ORIGIN` in `worker/wrangler.toml` to the Pages origin (for example `https://fox3000foxy.github.io`), then deploy: `cd worker && npx wrangler deploy`.
+3. In this repository, add an Actions variable `PUBLIC_AUTH_URL` with the worker URL.
+4. Under Settings, Pages, select GitHub Actions as the source.
+5. Push to `main`. `.github/workflows/pages.yml` runs the type check, unit tests and build, then deploys.
+
+`astro.config.mjs` sets `site` and `base`. Every internal link goes through `href()` in `src/lib/paths.ts`, so changing `base` there is enough when deploying under another repository name. Pages are emitted as `panel/index.html` and `settings/index.html` with trailing-slash links, which GitHub Pages serves without redirects.
+
+## Engine compatibility
+
+The panel works with the current engine without modification. Compatibility notes and recommended engine changes are in [docs/backend-changes.md](docs/backend-changes.md).
+
+## Limitations
+
+- The panel can only observe what GitHub exposes: vCPU and memory allocation are logged inside the VM step and are not available until the run completes, so the panel describes the allocation rule rather than live figures.
+- Graceful shutdown depends on the engine polling issues every 15 seconds; requests are acknowledged within that window.
+- The "Stopping..." state after a force stop is tracked per tab; other tabs show the run's step until GitHub reports it cancelled.
+- Hugging Face CORS behaviour for dataset deletion and tree listing was verified against mocks only. If the Hub refuses a browser request, the panel shows the error and the dataset can be deleted from the Hugging Face website.
+- Workspace creation uses GitHub's template generation endpoint, which requires the engine repository to be marked as a template.
