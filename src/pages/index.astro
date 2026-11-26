@@ -229,6 +229,48 @@ const steps = [
       </div>
     </section>
 
+    <section class="band" aria-labelledby="resources">
+      <div class="band__inner band__inner--split">
+        <header class="band__head">
+          <h2 id="resources">Runner resources and quotas</h2>
+          <p>Repository visibility affects runner resources and billing.</p>
+        </header>
+        <div class="prose">
+          <p>
+            Instance repositories are private by default.
+            Standard GitHub-hosted runners used by private
+            repositories consume your account's included
+            Actions minutes and may incur additional charges.
+          </p>
+          <p>
+            Public repositories may benefit from higher
+            runner specifications and free standard
+            GitHub-hosted runner minutes, subject to
+            GitHub's current policies and usage limits.
+            Repository visibility can be changed from Settings.
+          </p>
+          <p>
+            Public repositories expose workflow logs and
+            Remote Desktop endpoints. Secure your Windows
+            account and network access before changing
+            repository visibility.
+          </p>
+          <p>
+            Your Hugging Face persistence dataset must
+            remain private regardless of repository visibility.
+          </p>
+          <p>
+            <strong>Use shared resources responsibly.</strong>
+            Start your virtual machine only when needed
+            and shut it down when you are finished.
+            Free runner minutes do not authorize unlimited
+            or unrestricted computing workloads.
+            See our <a href={href('/disclaimer/')}>Disclaimer</a>.
+          </p>
+        </div>
+      </div>
+    </section>
+
     <section class="band" aria-labelledby="security">
       <div class="band__inner band__inner--split">
         <header class="band__head">
