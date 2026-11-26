@@ -182,6 +182,7 @@
 
 .endpoint__row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--s-3);
   min-width: 0;
@@ -201,6 +202,12 @@
   color: var(--c-text);
 }
 
+.endpoint__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
 .endpoint__note {
   font-size: var(--t-xs);
   color: var(--c-muted);
@@ -210,11 +217,23 @@
 
 .endpoint[data-endpoint-state='stale'] .endpoint__note,
 .endpoint[data-endpoint-state='invalid'] .endpoint__note,
-.endpoint[data-endpoint-state='missing'] .endpoint__note {
+.endpoint[data-endpoint-state='missing'] .endpoint__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+.endpoint__note {
   color: var(--c-warn);
 }
 
-.endpoint[data-endpoint-state='error'] .endpoint__note {
+.endpoint[data-endpoint-state='error'] .endpoint__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+.endpoint__note {
   color: var(--c-danger);
 }
 

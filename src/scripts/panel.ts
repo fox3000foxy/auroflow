@@ -8,6 +8,9 @@ import { stepDetail, type VmView } from '../lib/vm-state';
 import type { GhRepo, GhRun, GitHubClient } from '../lib/github';
 import { $, $$, el, icon, confirmDialog, copyText, toast } from '../lib/ui';
 import { ago, bytes, clock, dateTime, duration } from '../lib/format';
+import { downloadRdpFile, rdpUri, supportsRdpUri } from '../lib/rdp';
+
+const RDP_URI_SUPPORTED = supportsRdpUri(navigator.userAgent, (navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform ?? '');
 
 type Gate = 'loading' | 'signed-out' | 'no-workspace' | 'error' | 'ready';
 
@@ -16,6 +19,7 @@ let unsubscribe: (() => void) | null = null;
 let lastState: VmSnapshotState | null = null;
 let repoMeta: GhRepo | null = null;
 let ticker: ReturnType<typeof setInterval> | null = null;
+let workspaceRepo = '';
 
 function gate(name: Gate) {
   for (const section of $$('[data-gate]')) section.hidden = section.dataset.gate !== name;
@@ -71,6 +75,7 @@ async function boot() {
   }
 
   const repoKey = `${workspace.owner}/${workspace.repo}`;
+  workspaceRepo = workspace.repo;
   $('[data-instance-name]').textContent = workspace.repo;
   const repoLink = $('[data-instance-repo]') as HTMLAnchorElement;
   repoLink.textContent = `${repoKey}${repoMeta.private ? '' : ' (public)'}`;
@@ -149,6 +154,11 @@ function renderEndpoint(view: VmView | null) {
   box.dataset.endpointState = state;
   value.textContent = view?.endpoint ?? (state === 'pending' ? 'Waiting for tunnel' : 'No active endpoint');
   copy.disabled = !view?.endpoint;
+  ($('[data-action="rdp-file"]') as HTMLButtonElement).disabled = !view?.endpoint;
+  const uriLink = $('[data-rdp-link]') as HTMLAnchorElement;
+  uriLink.hidden = !(RDP_URI_SUPPORTED && view?.endpoint);
+  if (view?.endpoint) uriLink.href = rdpUri(view.endpoint);
+  else uriLink.removeAttribute('href');
   note.textContent = view?.endpointNote || (view?.phase === 'off' ? 'Start the instance to open an RDP tunnel.' : '');
 
   const link = $('[data-workflow-link]') as HTMLAnchorElement;
@@ -385,6 +395,17 @@ function bindActions() {
       label.textContent = 'Copied';
       setTimeout(() => (label.textContent = 'Copy'), 1800);
     } else toast('The browser blocked clipboard access. Select the address and copy it manually.', 'error');
+  });
+
+  $('[data-action="rdp-file"]').addEventListener('click', () => {
+    const endpoint = lastState?.view?.endpoint;
+    if (!endpoint) return;
+    try {
+      downloadRdpFile(endpoint, workspaceRepo);
+      toast('Connection file downloaded. Open it with your Remote Desktop client.', 'success');
+    } catch (error) {
+      toast(describe(error), 'error');
+    }
   });
 
   $('[data-gate-retry]').addEventListener('click', () => void boot());

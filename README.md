@@ -27,6 +27,14 @@ The VM status is derived from the steps of the active workflow run (`GET /action
 
 The endpoint is displayed only when `session.json` has the current `run_id` and a valid `host:port`. Endpoints of completed or cancelled runs are never shown. The panel distinguishes a missing control branch, a stale session from another run, a malformed file and an API error, and shows each differently. GitHub Actions status is kept as secondary information in its own panel.
 
+### Connecting
+
+When the endpoint is available, the panel offers three ways to connect:
+
+- **Copy**: the `host:port` address, for any RDP client.
+- **Download .rdp**: a connection file generated in the browser (`full address:s:host:port`, no credentials). Remote Desktop Connection opens it on Windows, Windows App on macOS and Remmina on Linux.
+- **Open in Remote Desktop**: a legacy `rdp://full%20address=s:host:port` link, shown only on macOS, iOS and Android, the only platforms whose Microsoft clients handle this URI scheme. Windows clients do not support it.
+
 Polling runs every 5 to 6 seconds during transitions and every 15 seconds while ON. It stops while the instance is off and while the tab is hidden, backs off on errors, and stops on authentication errors. Requests use `cache: 'no-cache'` so GitHub's 60-second `Cache-Control` never shows a stale state; unchanged resources answer 304, which does not count against the rate limit.
 
 Duplicate launches are prevented by checking for active runs before dispatching and by a cross-tab dispatch lock held until the new run appears (or for two minutes).

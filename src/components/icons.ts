@@ -35,6 +35,7 @@ export const ICONS = {
   workflow: '<rect x="3.5" y="3.5" width="6" height="6" rx="1"/><rect x="14.5" y="14.5" width="6" height="6" rx="1"/><path d="M6.5 9.5v3a2 2 0 0 0 2 2h6"/>',
   circle: '<circle cx="12" cy="12" r="8.5"/>',
   minus: '<path d="M6 12h12"/>',
+  download: '<path d="M12 4v11"/><path d="M7.5 10.5L12 15l4.5-4.5"/><path d="M5 19.5h14"/>',
   chevron: '<path d="M9 6l6 6-6 6"/>',
   eye: '<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/>',
 } as const;

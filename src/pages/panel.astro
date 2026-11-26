@@ -132,9 +132,17 @@ const stages = ['Runner', 'Dataset', 'Golden Image', 'Layers', 'Boot', 'Tunnel',
                 <span class="endpoint__label">Endpoint</span>
                 <div class="endpoint__row">
                   <code class="endpoint__value" data-endpoint>No active endpoint</code>
-                  <button class="btn btn--sm" type="button" data-action="copy" disabled>
-                    <Icon name="copy" /> <span data-copy-label>Copy</span>
-                  </button>
+                  <div class="endpoint__actions">
+                    <button class="btn btn--sm" type="button" data-action="copy" disabled>
+                      <Icon name="copy" /> <span data-copy-label>Copy</span>
+                    </button>
+                    <button class="btn btn--sm" type="button" data-action="rdp-file" disabled title="Opens in Remote Desktop Connection, Windows App or Remmina">
+                      <Icon name="download" /> Download .rdp
+                    </button>
+                    <a class="btn btn--sm" data-rdp-link hidden title="Opens the Microsoft Remote Desktop client on macOS, iOS and Android">
+                      <Icon name="monitor" /> Open in Remote Desktop
+                    </a>
+                  </div>
                 </div>
                 <p class="endpoint__note" data-endpoint-note>Start the instance to open an RDP tunnel.</p>
               </div>
