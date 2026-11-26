@@ -72,7 +72,7 @@ npm run dev             # http://localhost:4321/windows-golden-panel/
 | `npm run build` | Production build to `dist/`. |
 | `npm run preview` | Serve the production build on port 4321. |
 
-The worker accepts requests from `PANEL_ORIGIN` and `http://localhost:4321`, so both `dev` and `preview` can sign in against the deployed relay.
+The worker accepts requests from `PANEL_ORIGINS` and from `http://localhost:4321` / `http://127.0.0.1:4321`, so both `dev` and `preview` can sign in against the deployed relay.
 
 ### Project structure
 
@@ -86,7 +86,7 @@ src/
   scripts/      Client entry points per page
   styles/       tokens.css, global.css, app.css, home.css, panel.css, settings.css
 tests/          Vitest unit tests
-worker/         Cloudflare Worker for Device Flow (unchanged)
+worker/         Cloudflare Worker for Device Flow
 ```
 
 Integration constants (workflow file name, step names, branch, issue title, secret and variable names) live in `src/lib/config.ts` and `src/lib/vm-state.ts`. Update them there if the engine changes.
@@ -94,7 +94,7 @@ Integration constants (workflow file name, step names, branch, issue title, secr
 ## Deployment
 
 1. Create a GitHub OAuth App, enable Device Flow, and set its client ID in `worker/wrangler.toml`.
-2. Set `PANEL_ORIGIN` in `worker/wrangler.toml` to the Pages origin (for example `https://fox3000foxy.github.io`), then deploy: `cd worker && npx wrangler deploy`.
+2. List every origin the panel is served from in `PANEL_ORIGINS` in `worker/wrangler.toml` (comma-separated, for example `https://fox3000foxy.com,https://fox3000foxy.github.io`), then deploy: `cd worker && npx wrangler deploy`. With a custom Pages domain, the browser sends the custom domain as its origin.
 3. The deploy workflow uses `https://windows-golden-auth.fox3000foxy.workers.dev` by default. To use another relay, add an Actions variable (not a secret) named `PUBLIC_AUTH_URL` with its URL.
 4. Under Settings, Pages, select GitHub Actions as the source.
 5. Push to `main`. `.github/workflows/pages.yml` runs the type check, unit tests and build, then deploys.

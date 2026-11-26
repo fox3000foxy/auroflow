@@ -1,6 +1,9 @@
 name = "windows-golden-auth"
 main = "index.js"
 compatibility_date = "2025-01-01"
+
 [vars]
-PANEL_ORIGIN = "https://fox3000foxy.github.io"
+# Every origin the panel is served from, comma-separated, without trailing slash.
+# http://localhost:4321 and http://127.0.0.1:4321 are always allowed for development.
+PANEL_ORIGINS = "https://fox3000foxy.com,https://fox3000foxy.github.io"
 GITHUB_CLIENT_ID = "Ov23liV1ST2dFKBLD7SU"

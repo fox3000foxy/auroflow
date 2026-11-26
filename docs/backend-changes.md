@@ -41,6 +41,16 @@ This matches workspaces created by the panel, which are always under the signed-
 
 Workspace creation calls `POST /repos/fox3000foxy/windows10-golden/generate`, which only works if the engine repository is marked as a template (Settings, General, Template repository). This could not be verified from the build environment. If it is not, the panel shows the GitHub error and the workspace can be created with "Use this template" or a fork, then selected by name in Settings.
 
-## 6. Authentication worker
+## 6. Authentication worker (changed)
 
-Unchanged. It still lacks rate limiting, as noted in the original README; Cloudflare's rate limiting rules can be added without code changes. `PANEL_ORIGIN` must match the Pages origin exactly, and `http://localhost:4321` remains allowed for local development and preview.
+The worker accepted a single origin (`PANEL_ORIGIN = https://fox3000foxy.github.io`). The panel is served from the custom domain `https://fox3000foxy.com`, so the browser sent that origin, the worker answered 403 **without CORS headers**, and the browser reported an opaque CORS error.
+
+Changes in `worker/index.js` and `worker/wrangler.toml`:
+
+- `PANEL_ORIGINS` accepts a comma-separated list (`https://fox3000foxy.com,https://fox3000foxy.github.io`). `PANEL_ORIGIN` is still read for older configurations. `http://localhost:4321` and `http://127.0.0.1:4321` stay allowed for development.
+- Every response, including errors (400, 404, 405, 500, 502), carries CORS headers for allowed origins, so the panel shows the real error instead of a CORS failure.
+- Refused origins get a JSON 403 (`origin_not_allowed`) that the panel can read and explain.
+- Malformed JSON, a missing or oversized `device_code`, a missing client ID and GitHub being unreachable are handled explicitly.
+- `Vary: Origin` and a 24-hour preflight cache are set.
+
+Redeploy with `cd worker && npx wrangler deploy`. The worker still has no rate limiting; Cloudflare's rate limiting rules can be added without code changes.

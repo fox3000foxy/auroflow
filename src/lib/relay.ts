@@ -38,7 +38,17 @@ async function relay<T>(path: string, body: unknown): Promise<T> {
     throw new ApiError('Authentication relay', 'network', 'The relay could not be reached.');
   }
   if (!response.ok) {
-    const hint = response.status === 403 ? ' This origin is not allowed by the relay (PANEL_ORIGIN).' : '';
+    let hint = '';
+    if (response.status === 403) {
+      hint = ` ${window.location.origin} is not allowed by the relay. Add it to PANEL_ORIGINS in worker/wrangler.toml and redeploy the worker.`;
+    } else {
+      try {
+        const data = (await response.json()) as { error_description?: string; error?: string };
+        hint = data.error_description ? ` ${data.error_description}` : data.error ? ` ${data.error}` : '';
+      } catch {
+        /* not JSON */
+      }
+    }
     throw new ApiError('Authentication relay', kindForStatus(response.status), `Request failed with ${response.status}.${hint}`, response.status);
   }
   return (await response.json()) as T;
