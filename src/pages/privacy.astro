@@ -1,0 +1,264 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import '../styles/legal.css';
+import { href } from '../lib/paths';
+---
+
+<BaseLayout
+  title="Privacy Policy"
+  description="How Windows Golden Panel processes and stores information."
+  page="privacy"
+>
+  <main id="main" class="legal-page">
+    <header>
+      <h1>Privacy Policy</h1>
+      <p class="legal-date">Last updated: November 26, 2026</p>
+    </header>
+
+    <section>
+      <h2>1. Overview and data controller</h2>
+      <p>
+        Windows Golden Panel is a browser-based application
+        for managing virtual machines through third-party
+        infrastructure.
+      </p>
+      <p>
+        The application does not operate a central user
+        database. Most operations take place directly
+        between your browser and third-party APIs.
+      </p>
+      <p>
+        The publisher identified in the
+        <a href={href('/legal/')}>Legal Notice</a>
+        is responsible for personal data processing under
+        their control.
+      </p>
+    </section>
+
+    <section>
+      <h2>2. Information processed</h2>
+      <ul>
+        <li>GitHub username, account information and avatar.</li>
+        <li>GitHub OAuth access tokens and granted permissions.</li>
+        <li>GitHub repository names, settings and workflow metadata.</li>
+        <li>ngrok and Hugging Face access tokens supplied by the user.</li>
+        <li>Dataset identifiers and storage metadata.</li>
+        <li>Remote Desktop endpoints and network configuration.</li>
+        <li>Local application activity and preferences.</li>
+        <li>Technical connection information processed by hosting providers.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>3. Authentication and permissions</h2>
+      <p>
+        Authentication uses GitHub OAuth Device Flow.
+        Your GitHub password is not entered into this application.
+      </p>
+      <p>
+        A Cloudflare Worker relays authentication requests
+        and responses between your browser and GitHub.
+        The relay does not implement persistent token
+        storage or explicit token logging.
+      </p>
+      <p>
+        The application requests the GitHub OAuth scopes
+        <code>repo</code> and <code>workflow</code>.
+        These permissions are broad and may grant access
+        to repositories beyond the selected workspace.
+      </p>
+      <p>
+        Authorization may be revoked through your
+        <a href="https://github.com/settings/applications">
+          GitHub application settings
+        </a>.
+      </p>
+    </section>
+
+    <section>
+      <h2>4. Credential storage</h2>
+      <ul>
+        <li>
+          GitHub tokens are stored in sessionStorage by
+          default, with an application-level inactivity
+          limit of eight hours.
+        </li>
+        <li>
+          If you enable persistent sign-in, the GitHub
+          token is stored in localStorage and accepted
+          by the application for up to seven days.
+        </li>
+        <li>
+          ngrok tokens are encrypted in the browser using
+          the repository public key and submitted as
+          GitHub Actions secrets.
+        </li>
+        <li>
+          Hugging Face tokens are also submitted as
+          encrypted GitHub Actions secrets and may
+          optionally be retained in sessionStorage.
+        </li>
+      </ul>
+      <p>
+        Browser storage is not an encrypted credential
+        vault. Other scripts running under the same web
+        origin may be able to access stored information.
+      </p>
+      <p>
+        Signing out clears locally stored credentials
+        but does not revoke tokens or delete credentials
+        previously saved in GitHub Actions.
+      </p>
+    </section>
+
+    <section>
+      <h2>5. Purposes and legal bases</h2>
+      <p>
+        Information is processed to authenticate users,
+        configure workspaces, manage virtual machine
+        sessions, display operational information and
+        provide persistent storage.
+      </p>
+      <p>
+        Where applicable, processing necessary to provide
+        the requested functionality is based on the
+        provision of that service. Security-related
+        processing may rely on legitimate interests.
+        Optional credential retention is based on your
+        affirmative choice and may be disabled.
+      </p>
+    </section>
+
+    <section>
+      <h2>6. Third-party services</h2>
+      <p>
+        The application relies on external providers
+        that process information under their own terms
+        and privacy policies.
+      </p>
+      <ul>
+        <li>
+          <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">
+            GitHub
+          </a>: authentication, hosting, repositories,
+          workflow execution and secrets.
+        </li>
+        <li>
+          <a href="https://www.cloudflare.com/privacypolicy/">
+            Cloudflare
+          </a>: authentication relay infrastructure.
+        </li>
+        <li>
+          <a href="https://ngrok.com/privacy">
+            ngrok
+          </a>: network tunnelling and remote connectivity.
+        </li>
+        <li>
+          <a href="https://huggingface.co/privacy">
+            Hugging Face
+          </a>: virtual machine persistence and dataset management.
+        </li>
+      </ul>
+      <p>
+        These providers may process information outside
+        the European Economic Area. International
+        transfers are subject to applicable legal
+        requirements and provider safeguards.
+      </p>
+    </section>
+
+    <section>
+      <h2>7. Virtual machine data</h2>
+      <p>
+        Virtual machine disk changes and associated
+        firmware and TPM state may be stored in a
+        Hugging Face dataset under your account.
+      </p>
+      <p>
+        These files may contain personal information,
+        credentials, installed software and documents
+        created during your virtual machine sessions.
+      </p>
+      <p>
+        A private dataset restricts access but does not
+        constitute end-to-end encryption.
+      </p>
+      <p>
+        Public GitHub workspaces may expose connection
+        endpoints, workflow metadata and operational logs.
+      </p>
+    </section>
+
+    <section>
+      <h2>8. Browser storage and tracking</h2>
+      <p>
+        The application uses localStorage and
+        sessionStorage for authentication, workspace
+        preferences, operational state and local activity.
+      </p>
+      <p>
+        The current application does not implement
+        advertising trackers or analytics scripts.
+        Hosting providers may independently process
+        technical connection information.
+      </p>
+    </section>
+
+    <section>
+      <h2>9. Data retention</h2>
+      <p>
+        Local workspace preferences and activity records
+        remain in browser storage until cleared.
+        Credential retention follows the limits described
+        above. Expired GitHub credentials are removed
+        when the application checks stored credentials.
+      </p>
+      <p>
+        Repository data, Actions secrets, workflow logs
+        and virtual machine datasets are retained according
+        to your settings and the relevant provider's
+        retention policies.
+      </p>
+      <p>
+        Infrastructure log retention is subject to the
+        applicable hosting configuration and provider policies.
+      </p>
+    </section>
+
+    <section>
+      <h2>10. Your rights</h2>
+      <p>
+        Where applicable under the GDPR, you may request
+        access, rectification, erasure, restriction,
+        portability or object to processing. You may
+        withdraw consent where processing relies on it.
+      </p>
+      <p>
+        You may clear local application data, revoke
+        GitHub authorization, remove Actions secrets
+        and delete your persistence dataset.
+      </p>
+      <p>
+        Requests concerning processing under the
+        publisher's control may be submitted using the
+        contact details in the
+        <a href={href('/legal/')}>Legal Notice</a>.
+      </p>
+      <p>
+        You also have the right to lodge a complaint with
+        the relevant supervisory authority, including
+        the French
+        <a href="https://www.cnil.fr">CNIL</a>.
+      </p>
+    </section>
+
+    <section>
+      <h2>11. Changes to this policy</h2>
+      <p>
+        This policy may be updated to reflect changes
+        in the application, its infrastructure or
+        applicable legal requirements.
+      </p>
+    </section>
+  </main>
+</BaseLayout>

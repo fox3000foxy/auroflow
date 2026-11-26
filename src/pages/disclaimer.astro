@@ -1,0 +1,192 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import '../styles/legal.css';
+---
+
+<BaseLayout
+  title="Disclaimer"
+  description="Usage conditions, technical limitations and risks."
+  page="disclaimer"
+>
+  <main id="main" class="legal-page">
+    <header>
+      <h1>Disclaimer</h1>
+      <p class="legal-date">Last updated: November 26, 2026</p>
+    </header>
+
+    <section>
+      <h2>1. Nature of the project</h2>
+      <p>
+        Windows Golden Panel is an independent,
+        experimental software project for managing
+        virtual machines on third-party infrastructure.
+      </p>
+      <p>
+        It is not a commercial cloud computing provider,
+        managed hosting service or official Microsoft product.
+      </p>
+    </section>
+
+    <section>
+      <h2>2. Third-party terms of service</h2>
+      <p>
+        Using this project does not exempt users from
+        the terms, acceptable use policies, quotas or
+        technical restrictions imposed by external providers.
+      </p>
+      <ul>
+        <li>
+          <a href="https://docs.github.com/en/site-policy/github-terms/github-terms-of-service">
+            GitHub Terms of Service
+          </a>
+        </li>
+        <li>
+          <a href="https://ngrok.com/tos">
+            ngrok Terms of Service
+          </a>
+        </li>
+        <li>
+          <a href="https://huggingface.co/terms-of-service">
+            Hugging Face Terms of Service
+          </a>
+        </li>
+        <li>
+          <a href="https://www.cloudflare.com/terms/">
+            Cloudflare Terms
+          </a>
+        </li>
+      </ul>
+      <p>
+        The technical ability to run a workload does not
+        establish that the workload is permitted.
+        Users must verify that their intended usage is
+        authorized by each relevant provider.
+      </p>
+    </section>
+
+    <section>
+      <h2>3. Microsoft Windows licensing</h2>
+      <p>
+        Microsoft Windows is proprietary software.
+        Windows Golden Panel does not grant a Windows
+        license or any other Microsoft software entitlement.
+      </p>
+      <p>
+        Operating system activation does not establish
+        that a valid license has been obtained.
+        Activation tools, including Microsoft Activation
+        Scripts (MAS), are not substitutes for a license.
+      </p>
+      <p>
+        Users must ensure that installation, execution,
+        virtualization and redistribution of any Windows
+        image comply with applicable licensing terms.
+      </p>
+    </section>
+
+    <section>
+      <h2>4. Remote access and security</h2>
+      <p>
+        <strong>
+          The reference Windows image contains a
+          passwordless user account.
+        </strong>
+      </p>
+      <p>
+        An ngrok authentication token authorizes the
+        tunnel agent. It does not authenticate Remote
+        Desktop clients.
+      </p>
+      <p>
+        Public workspaces may expose Remote Desktop
+        endpoints through repository files and workflow
+        logs. Private repositories do not, by themselves,
+        prevent unauthorized network access.
+      </p>
+      <p>
+        Users must configure appropriate authentication,
+        network access restrictions and security updates
+        before exposing a virtual machine to the internet.
+      </p>
+    </section>
+
+    <section>
+      <h2>5. Data loss and persistence</h2>
+      <p>
+        Virtual machine persistence is provided on a
+        best-effort basis and depends on successful
+        shutdown, disk validation and dataset uploads.
+      </p>
+      <p>
+        Forced cancellation, infrastructure failures,
+        exhausted quotas, incompatible image versions
+        or interrupted uploads may result in data loss.
+      </p>
+      <p>
+        Deleting a persistence dataset may permanently
+        remove virtual machine data. Users should maintain
+        independent backups of important information.
+      </p>
+    </section>
+
+    <section>
+      <h2>6. Availability and costs</h2>
+      <p>
+        No guarantee is made regarding availability,
+        performance, session duration, storage capacity
+        or continued compatibility with external services.
+      </p>
+      <p>
+        Third-party providers may modify their services,
+        introduce charges, restrict usage or suspend
+        accounts according to their applicable terms.
+      </p>
+      <p>
+        Users are responsible for monitoring usage,
+        quotas and any charges incurred through their
+        own accounts.
+      </p>
+    </section>
+
+    <section>
+      <h2>7. Acceptable use</h2>
+      <p>
+        The project must not be used for unauthorized
+        access, unlawful activity, malicious workloads,
+        infringement of intellectual property rights,
+        abuse of shared infrastructure or circumvention
+        of provider restrictions.
+      </p>
+    </section>
+
+    <section>
+      <h2>8. Warranty and liability</h2>
+      <p>
+        The application is provided on an as-is and
+        as-available basis, without warranties of
+        uninterrupted operation, fitness for a particular
+        purpose or absolute security.
+      </p>
+      <p>
+        To the extent permitted by applicable law,
+        the publisher shall not be liable for losses
+        arising from third-party service failures,
+        unauthorized use, data loss or user configuration.
+      </p>
+      <p>
+        Nothing in this disclaimer excludes or restricts
+        liability or mandatory rights that cannot
+        lawfully be excluded or restricted.
+      </p>
+    </section>
+
+    <section>
+      <h2>9. No affiliation</h2>
+      <p>
+        Windows Golden Panel is not affiliated with
+        Microsoft, GitHub, Cloudflare, ngrok or Hugging Face.
+        References to these services are descriptive only.
+      </p>
+    </section>
+  </main>
+</BaseLayout>

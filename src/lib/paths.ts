@@ -13,7 +13,7 @@ export function href(path = '/'): string {
   return `${BASE}/${withSlash}${rest}`;
 }
 
-export type PageKey = 'home' | 'panel' | 'settings';
+export type PageKey = 'home' | 'panel' | 'settings' | 'legal' | 'privacy' | 'disclaimer';
 
 export const NAV: { key: PageKey; label: string; path: string }[] = [
   { key: 'home', label: 'Overview', path: '/' },

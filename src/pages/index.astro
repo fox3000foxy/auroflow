@@ -243,7 +243,7 @@ const steps = [
             <li><strong>Force stop discards the session.</strong> Cancelling the run skips the save step.</li>
           </ul>
           <ul class="facts">
-            <li><strong>Tokens stay out of the repository.</strong> They are sealed in the browser with the repository key and stored as Actions secrets. The GitHub token is kept only in the open browser tab.</li>
+            <li><strong>Tokens stay out of the repository.</strong> They are sealed in the browser with the repository key and stored as Actions secrets. The GitHub token is kept in the browser tab by default, with optional persistent sign-in for up to seven days.</li>
             <li><strong>The OAuth scope is broad.</strong> Device Flow requests <code>repo</code> and <code>workflow</code>, which reach all your repositories. A dedicated GitHub account limits the impact.</li>
             <li><strong>Sessions are time limited.</strong> Runs stop after {WORKFLOW_TIMEOUT_MIN} minutes; the engine powers Windows down at {AUTO_SHUTDOWN_MIN} minutes to leave time for the save.</li>
             <li><strong>Licensing is yours.</strong> The reference install was activated with MAS, which is not a Windows license. Use runners according to GitHub's terms.</li>
@@ -272,13 +272,4 @@ const steps = [
     </section>
   </main>
 
-  <footer class="footer">
-    <div class="footer__inner">
-      <div class="footer__links">
-        <a href={ENGINE_URL} target="_blank" rel="noopener noreferrer"><Icon name="github" /> fox3000foxy/windows10-golden</a>
-        <a href={PANEL_URL} target="_blank" rel="noopener noreferrer"><Icon name="github" /> fox3000foxy/windows-golden-panel</a>
-      </div>
-      <p>Independent project, not affiliated with Microsoft, GitHub, ngrok or Hugging Face. Use only infrastructure you are authorised to use and properly licensed images.</p>
-    </div>
-  </footer>
 </BaseLayout>

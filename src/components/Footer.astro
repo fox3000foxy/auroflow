@@ -1,0 +1,69 @@
+---
+import { href } from '../lib/paths';
+import { PANEL_URL, ENGINE_URL } from '../lib/config';
+---
+
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <div class="site-footer__brand">
+      <strong>Windows Golden Panel</strong>
+      <span>Independent software project.</span>
+    </div>
+
+    <nav aria-label="Legal information">
+      <a href={href('/legal/')}>Legal Notice</a>
+      <a href={href('/privacy/')}>Privacy Policy</a>
+      <a href={href('/disclaimer/')}>Disclaimer</a>
+      <a href={PANEL_URL}>Source code</a>
+      <a href={ENGINE_URL}>VM engine</a>
+    </nav>
+
+    <p>
+      Not affiliated with Microsoft, GitHub, Cloudflare,
+      ngrok or Hugging Face.
+    </p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    border-top: 1px solid var(--c-line);
+    padding: var(--s-8) var(--s-6);
+    background: var(--c-ink);
+    color: var(--c-muted);
+    font-size: var(--t-xs);
+  }
+
+  .site-footer__inner {
+    max-width: var(--content-max);
+    margin: 0 auto;
+    display: grid;
+    gap: var(--s-4);
+  }
+
+  .site-footer__brand {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-3);
+  }
+
+  strong {
+    color: var(--c-text);
+    font-weight: 600;
+  }
+
+  nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-5);
+  }
+
+  nav a {
+    color: var(--c-text-2);
+    text-decoration: none;
+  }
+
+  nav a:hover {
+    color: var(--c-gold);
+  }
+</style>
