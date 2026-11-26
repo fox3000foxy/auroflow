@@ -15,8 +15,41 @@ import { href } from '../lib/paths';
       <p class="legal-date">Last updated: November 26, 2026</p>
     </header>
 
+    <nav class="legal-toc" aria-label="Table of contents">
+      <p class="legal-toc__title">Table of contents</p>
+      <ol>
+        <li><a href="#overview-and-data-controller">1. Overview and data controller</a></li>
+        <li><a href="#information-processed">2. Information processed</a></li>
+        <li><a href="#authentication-and-permissions">3. Authentication and permissions</a></li>
+        <li><a href="#credential-storage">4. Credential storage</a></li>
+        <li><a href="#purposes-and-legal-bases">5. Purposes and legal bases</a></li>
+        <li><a href="#third-party-services">6. Third-party services</a></li>
+        <li><a href="#virtual-machine-data">7. Virtual machine data</a></li>
+        <li><a href="#browser-storage-and-tracking">8. Browser storage and tracking</a></li>
+        <li><a href="#data-retention">9. Data retention</a></li>
+        <li><a href="#your-rights">10. Your rights</a></li>
+        <li><a href="#changes-to-this-policy">11. Changes to this policy</a></li>
+        <li><a href="#scope-and-separation-of-responsibilities">12. Scope and separation of responsibilities</a></li>
+        <li><a href="#information-obtained-from-github">13. Information obtained from GitHub</a></li>
+        <li><a href="#authentication-relay-and-token-transit">14. Authentication relay and token transit</a></li>
+        <li><a href="#detailed-browser-storage-inventory">15. Detailed browser storage inventory</a></li>
+        <li><a href="#credential-expiration-and-session-restoration">16. Credential expiration and session restoration</a></li>
+        <li><a href="#shared-browser-origins-and-credential-exposure">17. Shared browser origins and credential exposure</a></li>
+        <li><a href="#repository-secrets-and-credential-transmission">18. Repository secrets and credential transmission</a></li>
+        <li><a href="#public-repositories-and-disclosure">19. Public repositories and disclosure</a></li>
+        <li><a href="#virtual-machine-contents-and-remote-desktop-traffic">20. Virtual machine contents and remote desktop traffic</a></li>
+        <li><a href="#data-retention-and-deletion-procedures">21. Data retention and deletion procedures</a></li>
+        <li><a href="#security-measures-and-limitations">22. Security measures and limitations</a></li>
+        <li><a href="#support-communications">23. Support communications</a></li>
+        <li><a href="#international-processing-and-safeguards">24. International processing and safeguards</a></li>
+        <li><a href="#automated-decisions-and-user-activity">25. Automated decisions and user activity</a></li>
+        <li><a href="#exercising-data-protection-rights">26. Exercising data protection rights</a></li>
+      </ol>
+    </nav>
+
+
     <section>
-      <h2>1. Overview and data controller</h2>
+      <h2 id="overview-and-data-controller">1. Overview and data controller</h2>
       <p>
         Windows Golden Panel is a browser-based application
         for managing virtual machines through third-party
@@ -36,7 +69,7 @@ import { href } from '../lib/paths';
     </section>
 
     <section>
-      <h2>2. Information processed</h2>
+      <h2 id="information-processed">2. Information processed</h2>
       <ul>
         <li>GitHub username, account information and avatar.</li>
         <li>GitHub OAuth access tokens and granted permissions.</li>
@@ -50,7 +83,7 @@ import { href } from '../lib/paths';
     </section>
 
     <section>
-      <h2>3. Authentication and permissions</h2>
+      <h2 id="authentication-and-permissions">3. Authentication and permissions</h2>
       <p>
         Authentication uses GitHub OAuth Device Flow.
         Your GitHub password is not entered into this application.
@@ -76,7 +109,7 @@ import { href } from '../lib/paths';
     </section>
 
     <section>
-      <h2>4. Credential storage</h2>
+      <h2 id="credential-storage">4. Credential storage</h2>
       <ul>
         <li>
           GitHub tokens are stored in sessionStorage by
@@ -112,7 +145,7 @@ import { href } from '../lib/paths';
     </section>
 
     <section>
-      <h2>5. Purposes and legal bases</h2>
+      <h2 id="purposes-and-legal-bases">5. Purposes and legal bases</h2>
       <p>
         Information is processed to authenticate users,
         configure workspaces, manage virtual machine
@@ -130,7 +163,7 @@ import { href } from '../lib/paths';
     </section>
 
     <section>
-      <h2>6. Third-party services</h2>
+      <h2 id="third-party-services">6. Third-party services</h2>
       <p>
         The application relies on external providers
         that process information under their own terms
@@ -168,7 +201,7 @@ import { href } from '../lib/paths';
     </section>
 
     <section>
-      <h2>7. Virtual machine data</h2>
+      <h2 id="virtual-machine-data">7. Virtual machine data</h2>
       <p>
         Virtual machine disk changes and associated
         firmware and TPM state may be stored in a
@@ -190,7 +223,7 @@ import { href } from '../lib/paths';
     </section>
 
     <section>
-      <h2>8. Browser storage and tracking</h2>
+      <h2 id="browser-storage-and-tracking">8. Browser storage and tracking</h2>
       <p>
         The application uses localStorage and
         sessionStorage for authentication, workspace
@@ -205,7 +238,7 @@ import { href } from '../lib/paths';
     </section>
 
     <section>
-      <h2>9. Data retention</h2>
+      <h2 id="data-retention">9. Data retention</h2>
       <p>
         Local workspace preferences and activity records
         remain in browser storage until cleared.
@@ -226,7 +259,7 @@ import { href } from '../lib/paths';
     </section>
 
     <section>
-      <h2>10. Your rights</h2>
+      <h2 id="your-rights">10. Your rights</h2>
       <p>
         Where applicable under the GDPR, you may request
         access, rectification, erasure, restriction,
@@ -253,12 +286,150 @@ import { href } from '../lib/paths';
     </section>
 
     <section>
-      <h2>11. Changes to this policy</h2>
+      <h2 id="changes-to-this-policy">11. Changes to this policy</h2>
       <p>
         This policy may be updated to reflect changes
         in the application, its infrastructure or
         applicable legal requirements.
       </p>
+    </section>
+
+    <section>
+      <h2 id="scope-and-separation-of-responsibilities">12. Scope and separation of responsibilities</h2>
+      <p>This policy concerns the hosted Windows Golden Panel website and its authentication relay. It does not replace the privacy policies of GitHub, Cloudflare, ngrok, Hugging Face, Microsoft or software installed inside a virtual machine.</p>
+      <p>Users control their own workspace repositories, persistence datasets, virtual machine contents and third-party accounts.</p>
+      <p>The publisher does not receive administrative access to those resources merely because a user signs in to the panel.</p>
+      <p>Depending on the circumstances, users processing personal information inside their virtual machines may have independent data protection obligations.</p>
+    </section>
+
+    <section>
+      <h2 id="information-obtained-from-github">13. Information obtained from GitHub</h2>
+      <p>After authentication, the panel retrieves account information required to identify the signed-in user, including the GitHub login and avatar.</p>
+      <p>It also retrieves repository information, workflow runs, job statuses, repository variables, secret names, shutdown requests and connection information necessary to manage the selected workspace.</p>
+      <p>GitHub Actions secret values cannot be retrieved through the normal secrets API. The panel may check whether a named secret exists, but this does not disclose its stored value.</p>
+      <p>The OAuth authorization is broader than the individual workspace. The repo and workflow scopes can authorize operations on other repositories accessible to the authenticated account, subject to GitHub permissions and organization policies.</p>
+      <p>The panel is designed to operate on the selected workspace. Users should nevertheless consider the security implications of granting broad OAuth permissions.</p>
+    </section>
+
+    <section>
+      <h2 id="authentication-relay-and-token-transit">14. Authentication relay and token transit</h2>
+      <p>GitHub's Device Flow endpoints cannot be called directly from the browser under the required cross-origin configuration. The application therefore uses a Cloudflare Worker as an authentication relay.</p>
+      <p>The relay forwards requests to GitHub's device authorization and access token endpoints. During authentication, device codes and the resulting access token pass through the relay.</p>
+      <p>The Worker adds the configured OAuth client identifier and requests the required GitHub scopes.</p>
+      <p>The current relay implementation does not contain a persistent user database, explicit credential logging or application-level token storage. Authentication responses include a Cache-Control: no-store directive.</p>
+      <p>This does not establish that infrastructure-level logging, diagnostic collection or security processing is disabled. Such processing depends on the actual Cloudflare deployment configuration and provider policies.</p>
+      <p>The relay's origin restrictions are a browser access control measure and must not be understood as an independent user authentication mechanism.</p>
+    </section>
+
+    <section>
+      <h2 id="detailed-browser-storage-inventory">15. Detailed browser storage inventory</h2>
+      <p>The application uses the golden-panel.v2 namespace to organize browser storage.</p>
+      <p>The github entry contains the OAuth access token, account login and timestamps used for session restoration. It is stored in sessionStorage by default or localStorage when persistent sign-in is selected.</p>
+      <p>The hf entry may contain a Hugging Face access token in sessionStorage.</p>
+      <p>The workspace entry contains the selected repository owner and name in localStorage.</p>
+      <p>Entries beginning with dispatch. contain timestamps used to reduce duplicate workflow launches across browser tabs.</p>
+      <p>Entries beginning with activity. contain local operational messages and timestamps, limited to the latest 60 entries per workspace.</p>
+      <p>The cancel entry contains up to ten workflow run identifiers associated with cancellation requests from the current tab.</p>
+      <p>A temporary legacyRepo entry may be used to migrate a repository preference from an earlier version of the panel.</p>
+      <p>These entries are intended for application functionality rather than advertising, profiling or cross-site behavioral tracking.</p>
+    </section>
+
+    <section>
+      <h2 id="credential-expiration-and-session-restoration">16. Credential expiration and session restoration</h2>
+      <p>The default GitHub session storage validity period is eight hours from the stored activity timestamp. Persistent sign-in uses a seven-day validity period measured from the original storage timestamp.</p>
+      <p>These limits are checked when stored credentials are read. They are not a guarantee that an already loaded session will terminate at the exact expiration time.</p>
+      <p>Expiration of local storage does not revoke the corresponding OAuth token at GitHub.</p>
+      <p>Browser session restoration features may also restore sessionStorage after a browser restart. Closing a tab should therefore not be treated as a guaranteed method of credential revocation.</p>
+      <p>Users requiring immediate invalidation should revoke the authorization directly through GitHub.</p>
+    </section>
+
+    <section>
+      <h2 id="shared-browser-origins-and-credential-exposure">17. Shared browser origins and credential exposure</h2>
+      <p>Browser storage is isolated primarily by web origin, not by URL path.</p>
+      <p>Where several applications are hosted under the same GitHub Pages origin or custom domain, scripts executing under that origin may potentially access shared localStorage.</p>
+      <p>Namespacing storage keys reduces accidental collisions but does not provide cryptographic isolation.</p>
+      <p>Users should avoid persistent sign-in on public, shared or otherwise untrusted computers and should keep their browser and extensions up to date.</p>
+      <p>The application cannot protect credentials against every form of browser compromise, malicious extension, operating system compromise or cross-site scripting vulnerability.</p>
+    </section>
+
+    <section>
+      <h2 id="repository-secrets-and-credential-transmission">18. Repository secrets and credential transmission</h2>
+      <p>ngrok and Hugging Face tokens entered during workspace configuration are encrypted using the GitHub repository public key before submission to the Actions secrets API.</p>
+      <p>The encryption operation takes place in the browser. The ngrok token is not intentionally retained in persistent browser storage.</p>
+      <p>The Hugging Face token may additionally be retained in sessionStorage for storage management operations, depending on the selected setting.</p>
+      <p>GitHub makes configured secrets available to authorized workflow executions. Consequently, the security of workflow definitions, repository permissions and dependencies remains important.</p>
+      <p>Users should grant only the permissions required for their intended operations and rotate credentials if compromise is suspected.</p>
+    </section>
+
+    <section>
+      <h2 id="public-repositories-and-disclosure">19. Public repositories and disclosure</h2>
+      <p>New instance repositories are private by default in the standard setup.</p>
+      <p>Users may choose to change repository visibility. A public repository may expose its source code, commit history, workflow logs, issues, operational metadata and Remote Desktop connection information.</p>
+      <p>Changing a repository back to private does not necessarily remove information previously copied, cached or otherwise obtained by third parties.</p>
+      <p>Repository visibility does not determine the privacy of the associated Hugging Face dataset. The persistence dataset must remain private.</p>
+      <p>Users should review repository contents and security settings before making any workspace public.</p>
+    </section>
+
+    <section>
+      <h2 id="virtual-machine-contents-and-remote-desktop-traffic">20. Virtual machine contents and remote desktop traffic</h2>
+      <p>The panel does not directly render the remote Windows desktop. Remote Desktop traffic is handled through the user's RDP client, the configured network tunnel and the virtual machine.</p>
+      <p>The panel polls infrastructure status and workflow metadata, but its current implementation does not monitor keyboard input, screen contents or application usage inside the guest operating system.</p>
+      <p>Software running inside Windows may independently collect telemetry, connect to external services or process personal information.</p>
+      <p>Disk overlays may contain documents, browser histories, application databases, credentials, deleted-file remnants and other information written to the virtual disk.</p>
+      <p>The publisher does not operate a content inspection service for those disk overlays.</p>
+      <p>Users should avoid storing sensitive or regulated information unless they have assessed the security and compliance requirements of the complete infrastructure.</p>
+    </section>
+
+    <section>
+      <h2 id="data-retention-and-deletion-procedures">21. Data retention and deletion procedures</h2>
+      <p>Signing out removes the panel's locally stored credentials and cancellation records. It does not automatically remove the selected workspace preference or all local activity history.</p>
+      <p>Clearing workspace information through Settings removes the relevant local configuration and activity records. It does not delete the remote repository, workflow logs, secrets or persistence dataset.</p>
+      <p>Browser site-data controls can be used to remove remaining local application storage.</p>
+      <p>GitHub OAuth access must be revoked separately through GitHub application settings. Actions secrets must be removed or replaced in the relevant repository.</p>
+      <p>Persistence datasets may be deleted through the available management controls or directly through Hugging Face.</p>
+      <p>Deleting a dataset or repository does not establish that every historical backup, provider log, cache or legally retained copy is immediately erased. Provider-specific retention policies remain applicable.</p>
+    </section>
+
+    <section>
+      <h2 id="security-measures-and-limitations">22. Security measures and limitations</h2>
+      <p>The application uses HTTPS for supported web and API communications, browser-side encryption for Actions secrets, origin restrictions on the authentication relay and a production Content Security Policy.</p>
+      <p>These measures reduce certain risks but do not guarantee absolute security.</p>
+      <p>Private repositories and private datasets provide access restrictions, not end-to-end encryption of virtual machine contents.</p>
+      <p>The publisher cannot guarantee the security of user devices, third-party infrastructure, browser extensions, installed guest software or modified deployments.</p>
+      <p>Suspected vulnerabilities should be reported privately to contact@fox3000foxy.com. Access tokens, passwords, private dataset contents and active RDP endpoints should not be included in public reports.</p>
+    </section>
+
+    <section>
+      <h2 id="support-communications">23. Support communications</h2>
+      <p>If you contact the publisher by email, the information you voluntarily provide may be processed to respond to your request, investigate technical problems or handle legal and security matters.</p>
+      <p>Such information may include your email address, message contents and relevant technical details.</p>
+      <p>Communications should contain only the information necessary to investigate the issue.</p>
+      <p>Support correspondence is retained only as necessary for the relevant purpose, subject to applicable legal obligations and legitimate needs to establish or defend legal claims.</p>
+    </section>
+
+    <section>
+      <h2 id="international-processing-and-safeguards">24. International processing and safeguards</h2>
+      <p>The infrastructure used by the project may involve processing in countries outside the European Economic Area.</p>
+      <p>The location of a user, repository or dataset does not necessarily determine where every request, backup or technical log is processed.</p>
+      <p>Applicable transfer safeguards depend on the provider, contractual arrangement, processing activity and destination.</p>
+      <p>Where the publisher is responsible for an international transfer of personal information, the applicable requirements of Chapter V of the GDPR must be respected.</p>
+      <p>Users may contact the publisher for information about safeguards applicable to processing under the publisher's responsibility.</p>
+    </section>
+
+    <section>
+      <h2 id="automated-decisions-and-user-activity">25. Automated decisions and user activity</h2>
+      <p>The panel derives technical virtual machine states from workflow information and uses automated logic to display statuses, prevent duplicate launches and request operational actions.</p>
+      <p>The current application does not implement advertising profiles, behavioral scoring or automated decisions intended to produce legal or similarly significant effects concerning individuals.</p>
+      <p>The decision to use or shut down an idle virtual machine remains with the end user, subject to workflow time limits and provider restrictions.</p>
+    </section>
+
+    <section>
+      <h2 id="exercising-data-protection-rights">26. Exercising data protection rights</h2>
+      <p>Privacy requests may be submitted to contact@fox3000foxy.com.</p>
+      <p>Please describe the processing concerned and the right you wish to exercise. Additional information may be requested where reasonably necessary to verify identity or locate the relevant information.</p>
+      <p>Where the GDPR applies, requests are handled within the applicable statutory time limits, normally one month, subject to permitted extensions.</p>
+      <p>The publisher may be unable to access or delete information held exclusively within a user's own account or by an independent provider. In such cases, the user may need to exercise the relevant rights directly with that provider.</p>
+      <p>Users must not provide account passwords, OAuth tokens or other secrets as proof of identity.</p>
     </section>
   </main>
 </BaseLayout>

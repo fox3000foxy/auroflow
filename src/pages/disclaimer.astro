@@ -14,8 +14,39 @@ import '../styles/legal.css';
       <p class="legal-date">Last updated: November 26, 2026</p>
     </header>
 
+    <nav class="legal-toc" aria-label="Table of contents">
+      <p class="legal-toc__title">Table of contents</p>
+      <ol>
+        <li><a href="#nature-of-the-project">1. Nature of the project</a></li>
+        <li><a href="#third-party-terms-of-service">2. Third-party terms of service</a></li>
+        <li><a href="#microsoft-windows-licensing">3. Microsoft Windows licensing</a></li>
+        <li><a href="#remote-access-and-security">4. Remote access and security</a></li>
+        <li><a href="#data-loss-and-persistence">5. Data loss and persistence</a></li>
+        <li><a href="#availability-and-costs">6. Availability and costs</a></li>
+        <li><a href="#acceptable-use">7. Acceptable use</a></li>
+        <li><a href="#responsible-resource-usage-and-quota-abuse">8. Responsible resource usage and quota abuse</a></li>
+        <li><a href="#warranty-and-liability">9. Warranty and liability</a></li>
+        <li><a href="#no-affiliation">10. No affiliation</a></li>
+        <li><a href="#no-managed-infrastructure-or-service-level-agreement">11. No managed infrastructure or service-level agreement</a></li>
+        <li><a href="#account-ownership-and-authorization">12. Account ownership and authorization</a></li>
+        <li><a href="#oauth-permissions-and-account-security">13. OAuth permissions and account security</a></li>
+        <li><a href="#repository-visibility-and-runner-allocation">14. Repository visibility and runner allocation</a></li>
+        <li><a href="#end-user-discretion-and-idle-sessions">15. End-user discretion and idle sessions</a></li>
+        <li><a href="#execution-limits-and-interruptions">16. Execution limits and interruptions</a></li>
+        <li><a href="#persistence-integrity-and-version-compatibility">17. Persistence integrity and version compatibility</a></li>
+        <li><a href="#dataset-deletion-and-destructive-operations">18. Dataset deletion and destructive operations</a></li>
+        <li><a href="#sensitive-information-and-regulated-workloads">19. Sensitive information and regulated workloads</a></li>
+        <li><a href="#guest-software-and-operating-system-maintenance">20. Guest software and operating system maintenance</a></li>
+        <li><a href="#licensing-and-distribution-responsibilities">21. Licensing and distribution responsibilities</a></li>
+        <li><a href="#independent-deployments-and-modifications">22. Independent deployments and modifications</a></li>
+        <li><a href="#support-and-maintenance-limitations">23. Support and maintenance limitations</a></li>
+        <li><a href="#mandatory-rights-and-interpretation">24. Mandatory rights and interpretation</a></li>
+      </ol>
+    </nav>
+
+
     <section>
-      <h2>1. Nature of the project</h2>
+      <h2 id="nature-of-the-project">1. Nature of the project</h2>
       <p>
         Windows Golden Panel is an independent,
         experimental software project for managing
@@ -28,7 +59,7 @@ import '../styles/legal.css';
     </section>
 
     <section>
-      <h2>2. Third-party terms of service</h2>
+      <h2 id="third-party-terms-of-service">2. Third-party terms of service</h2>
       <p>
         Using this project does not exempt users from
         the terms, acceptable use policies, quotas or
@@ -65,7 +96,7 @@ import '../styles/legal.css';
     </section>
 
     <section>
-      <h2>3. Microsoft Windows licensing</h2>
+      <h2 id="microsoft-windows-licensing">3. Microsoft Windows licensing</h2>
       <p>
         Microsoft Windows is proprietary software.
         Windows Golden Panel does not grant a Windows
@@ -85,7 +116,7 @@ import '../styles/legal.css';
     </section>
 
     <section>
-      <h2>4. Remote access and security</h2>
+      <h2 id="remote-access-and-security">4. Remote access and security</h2>
       <p>
         <strong>
           The reference Windows image contains a
@@ -111,7 +142,7 @@ import '../styles/legal.css';
     </section>
 
     <section>
-      <h2>5. Data loss and persistence</h2>
+      <h2 id="data-loss-and-persistence">5. Data loss and persistence</h2>
       <p>
         Virtual machine persistence is provided on a
         best-effort basis and depends on successful
@@ -130,7 +161,7 @@ import '../styles/legal.css';
     </section>
 
     <section>
-      <h2>6. Availability and costs</h2>
+      <h2 id="availability-and-costs">6. Availability and costs</h2>
       <p>
         No guarantee is made regarding availability,
         performance, session duration, storage capacity
@@ -149,7 +180,7 @@ import '../styles/legal.css';
     </section>
 
     <section>
-      <h2>7. Acceptable use</h2>
+      <h2 id="acceptable-use">7. Acceptable use</h2>
       <p>
         The project must not be used for unauthorized
         access, unlawful activity, malicious workloads,
@@ -160,7 +191,7 @@ import '../styles/legal.css';
     </section>
 
     <section>
-      <h2>8. Responsible resource usage and quota abuse</h2>
+      <h2 id="responsible-resource-usage-and-quota-abuse">8. Responsible resource usage and quota abuse</h2>
       <p>
         GitHub-hosted runners are shared computing resources.
         Free execution minutes for eligible public repositories
@@ -205,7 +236,7 @@ import '../styles/legal.css';
     </section>
 
     <section>
-      <h2>9. Warranty and liability</h2>
+      <h2 id="warranty-and-liability">9. Warranty and liability</h2>
       <p>
         The application is provided on an as-is and
         as-available basis, without warranties of
@@ -226,12 +257,133 @@ import '../styles/legal.css';
     </section>
 
     <section>
-      <h2>10. No affiliation</h2>
+      <h2 id="no-affiliation">10. No affiliation</h2>
       <p>
         Windows Golden Panel is not affiliated with
         Microsoft, GitHub, Cloudflare, ngrok or Hugging Face.
         References to these services are descriptive only.
       </p>
+    </section>
+
+    <section>
+      <h2 id="no-managed-infrastructure-or-service-level-agreement">11. No managed infrastructure or service-level agreement</h2>
+      <p>Windows Golden Panel provides an interface for interacting with infrastructure operated by independent third parties.</p>
+      <p>The publisher does not own, reserve or guarantee the availability of GitHub-hosted runners, ngrok tunnels or Hugging Face storage.</p>
+      <p>No service-level agreement, guaranteed response time, guaranteed recovery time or contractual uptime commitment is provided by the project.</p>
+      <p>The project should not be relied upon as the sole infrastructure for critical, emergency, production or time-sensitive operations.</p>
+    </section>
+
+    <section>
+      <h2 id="account-ownership-and-authorization">12. Account ownership and authorization</h2>
+      <p>Users must have lawful access to every account, repository, dataset and service configured through the application.</p>
+      <p>Users are responsible for obtaining the necessary authorization before accessing organizational resources or operating infrastructure on behalf of another person or entity.</p>
+      <p>The application does not grant additional rights beyond those provided by the underlying services.</p>
+      <p>Users must not submit stolen credentials, impersonate other account holders or use the project to access resources without authorization.</p>
+    </section>
+
+    <section>
+      <h2 id="oauth-permissions-and-account-security">13. OAuth permissions and account security</h2>
+      <p>The GitHub OAuth authorization includes broad repository and workflow permissions.</p>
+      <p>Users should review the authorization screen and understand that the resulting access token may have permissions beyond the selected instance repository.</p>
+      <p>Users are responsible for protecting their accounts, access tokens, browser sessions and authentication devices.</p>
+      <p>A suspected compromise should be addressed by revoking the OAuth authorization, rotating affected credentials, reviewing repository access and inspecting recent workflow activity.</p>
+      <p>The application cannot guarantee protection against malicious browser extensions, compromised devices or unauthorized modifications to its source code.</p>
+    </section>
+
+    <section>
+      <h2 id="repository-visibility-and-runner-allocation">14. Repository visibility and runner allocation</h2>
+      <p>Instance repositories are private by default in the standard setup.</p>
+      <p>Eligible public repositories may receive different runner specifications and billing treatment from private repositories under GitHub's current policies.</p>
+      <p>Public repository visibility does not authorize workloads that would otherwise violate GitHub Actions terms or acceptable use restrictions.</p>
+      <p>Users must independently assess whether their intended workloads are permitted. Repository visibility must not be used as a mechanism to evade applicable restrictions.</p>
+      <p>Making a repository public may expose operational logs, repository history and active connection endpoints. Appropriate authentication and network protections must be established before exposing a virtual machine.</p>
+    </section>
+
+    <section>
+      <h2 id="end-user-discretion-and-idle-sessions">15. End-user discretion and idle sessions</h2>
+      <p>The panel is not a guest activity monitoring system and does not determine whether a user is actively interacting with Windows.</p>
+      <p>The decision to start, continue or gracefully shut down a virtual machine is left to the end user, within the technical limits of the workflow and the applicable provider policies.</p>
+      <p>Users are expected to release shared computing resources when they are no longer required.</p>
+      <p>Disconnecting an RDP client does not necessarily stop the virtual machine or the associated GitHub Actions workflow.</p>
+      <p>Users should explicitly request a graceful shutdown and confirm that the workflow has completed.</p>
+      <p>The absence of automatic inactivity detection does not authorize unnecessary resource consumption, continuous uptime mechanisms or quota circumvention.</p>
+    </section>
+
+    <section>
+      <h2 id="execution-limits-and-interruptions">16. Execution limits and interruptions</h2>
+      <p>Virtual machine sessions are subject to workflow execution limits, runner availability, infrastructure failures and provider-imposed restrictions.</p>
+      <p>The engine attempts to initiate shutdown before the workflow deadline to allow time for persistence operations.</p>
+      <p>The remaining time is not a guarantee that every disk overlay can be compressed, validated and uploaded successfully.</p>
+      <p>An interrupted, cancelled or timed-out workflow may terminate without saving the latest session.</p>
+      <p>Users should initiate shutdown sufficiently early when preserving recent changes is important.</p>
+    </section>
+
+    <section>
+      <h2 id="persistence-integrity-and-version-compatibility">17. Persistence integrity and version compatibility</h2>
+      <p>Persistent storage relies on a chain of QCOW2 disk overlays associated with a specific Golden Image checksum.</p>
+      <p>The engine verifies disk and manifest integrity before restoring saved state. A checksum mismatch or incompatible backing image may prevent restoration.</p>
+      <p>Integrity verification cannot establish that every file inside Windows is intact or that the guest operating system is free from logical corruption.</p>
+      <p>Golden Image updates may require an explicit migration or rebase procedure. Existing overlays must not be attached to an incompatible base without appropriate validation.</p>
+      <p>Firmware variables and TPM state are also relevant to virtual machine identity and may be necessary to recover encrypted or security-sensitive guest data.</p>
+      <p>Users should retain independent backups and avoid treating the persistence dataset as their only recovery mechanism.</p>
+    </section>
+
+    <section>
+      <h2 id="dataset-deletion-and-destructive-operations">18. Dataset deletion and destructive operations</h2>
+      <p>Deleting a persistence dataset can remove the saved virtual machine state and cause subsequent sessions to start from the reference image.</p>
+      <p>Cancelling an active workflow may discard all changes made during that session.</p>
+      <p>Changing repository configuration, deleting secrets or revoking access tokens may prevent the engine from starting, restoring or saving a virtual machine.</p>
+      <p>Confirmation dialogs are intended to reduce accidental actions but do not eliminate the possibility of user error.</p>
+      <p>Users should verify the target repository, dataset and active session before performing destructive operations.</p>
+    </section>
+
+    <section>
+      <h2 id="sensitive-information-and-regulated-workloads">19. Sensitive information and regulated workloads</h2>
+      <p>The project is not represented as a certified environment for processing medical records, payment card information, classified material or other regulated or highly sensitive data.</p>
+      <p>Private storage and encrypted transport do not by themselves establish compliance with industry-specific security or regulatory requirements.</p>
+      <p>Users must assess their own confidentiality, encryption, access control, contractual and data protection obligations before storing sensitive information.</p>
+      <p>The publisher does not provide a general compliance certification for the virtual machine infrastructure.</p>
+    </section>
+
+    <section>
+      <h2 id="guest-software-and-operating-system-maintenance">20. Guest software and operating system maintenance</h2>
+      <p>The reference image is a prepared operating system installation. Its inclusion does not guarantee that every component is current, supported, secure or suitable for a particular workload.</p>
+      <p>Users are responsible for installing appropriate security updates, configuring authentication and reviewing software installed inside their instances.</p>
+      <p>Third-party applications, drivers and operating system components may have independent licensing, support and security requirements.</p>
+      <p>The publisher does not guarantee compatibility with all Windows applications, peripherals, virtualization-dependent features or hardware acceleration requirements.</p>
+    </section>
+
+    <section>
+      <h2 id="licensing-and-distribution-responsibilities">21. Licensing and distribution responsibilities</h2>
+      <p>A license covering the panel or engine source code does not grant a license to Microsoft Windows or other proprietary components.</p>
+      <p>Users must verify that their own licensing arrangements permit the intended installation, virtualization and remote access scenario.</p>
+      <p>The publisher remains responsible for obtaining any rights required for material distributed by the publisher.</p>
+      <p>No disclaimer transfers or removes intellectual property obligations imposed directly on the publisher by applicable law.</p>
+      <p>Rights holders may report concerns through contact@fox3000foxy.com.</p>
+    </section>
+
+    <section>
+      <h2 id="independent-deployments-and-modifications">22. Independent deployments and modifications</h2>
+      <p>Users may operate modified or independently hosted versions of the project where permitted by the applicable source code license.</p>
+      <p>Such deployments may differ from the official hosted version in their authentication flow, storage behavior, security configuration and data processing.</p>
+      <p>The operator of an independent deployment is responsible for its configuration, infrastructure, privacy information and compliance obligations.</p>
+      <p>The original publisher cannot guarantee the integrity or security of third-party modifications.</p>
+    </section>
+
+    <section>
+      <h2 id="support-and-maintenance-limitations">23. Support and maintenance limitations</h2>
+      <p>Technical assistance, documentation and bug fixes may be provided on a voluntary basis.</p>
+      <p>No commitment is made to respond to every support request, maintain every historical version or resolve issues within a particular timeframe.</p>
+      <p>External API changes, infrastructure restrictions or licensing concerns may require features to be modified or removed.</p>
+      <p>Users should not rely on the continued availability of the hosted authentication relay or panel as their only means of accessing or recovering their data.</p>
+    </section>
+
+    <section>
+      <h2 id="mandatory-rights-and-interpretation">24. Mandatory rights and interpretation</h2>
+      <p>The provisions of this disclaimer apply only to the extent permitted by applicable law.</p>
+      <p>They do not exclude liability where exclusion is prohibited, nor do they waive mandatory statutory rights or remedies.</p>
+      <p>Users remain responsible for their own actions and configuration choices. The publisher remains responsible for obligations imposed directly on the publisher.</p>
+      <p>If a provision is unenforceable, the remaining provisions may continue to apply to the extent permitted by law.</p>
     </section>
   </main>
 </BaseLayout>
