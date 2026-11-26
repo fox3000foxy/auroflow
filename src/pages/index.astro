@@ -1,0 +1,64 @@
+---
+import '../styles/global.css';
+---
+<html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Golden / Console</title></head><body>
+<header><a class="brand" href="#"><span class="mark">G</span> golden<span class="muted"> / console</span></a><span id="identity" class="muted">Not connected</span><button id="logout" hidden>Sign out</button></header>
+<main><aside><p class="eyebrow">WORKSPACE</p><a href="#overview">Overview</a><a href="#configuration">Configuration</a><a href="#activity">Activity</a><a href="https://github.com/fox3000foxy/windows10-golden">Source repository</a></aside><article>
+<section id="login"><p class="eyebrow">REMOTE WORKSPACE</p><h1>Your Windows instance.</h1><p>Provision and manage a persistent Windows workspace using your own accounts.</p><button class="primary" id="connect">Connect GitHub</button><div id="device" hidden><p>Enter this code on GitHub:</p><strong id="code"></strong><p><a href="https://github.com/login/device" target="_blank" rel="noopener">Open GitHub device login</a></p></div></section>
+<div id="dashboard" hidden><section id="overview"><p class="eyebrow">INSTANCE / 01</p><div class="line"><h1>Windows 10</h1><span class="status" id="status">Unknown</span></div><p>IoT Enterprise LTSC 2021 / Golden Image</p><div class="metrics"><div><small>DISK</small><strong>64 GiB</strong></div><div><small>COMPUTE</small><strong>GitHub runner</strong></div><div><small>STORAGE</small><strong>Hugging Face</strong></div></div><div class="connection"><small>REMOTE DESKTOP</small><p id="address">No active endpoint</p><button id="copy" disabled>Copy address</button> <a id="runlink" hidden target="_blank" rel="noopener">View workflow</a></div><div class="actions"><button class="primary" id="start" disabled>Start instance</button><button id="stop" disabled>Request shutdown</button><button id="force" disabled>Force stop</button><button id="refresh">Refresh</button></div></section>
+<section id="configuration"><p class="eyebrow">CONFIGURATION</p><h2>Provision workspace</h2><p>Use a private repository and dedicated, restricted service tokens.</p><form id="setup"><label>Repository name<input id="repo" value="windows-golden-instance" pattern="[A-Za-z0-9_.-]+" required/></label><label>ngrok authtoken<input id="ngrok" type="password" autocomplete="off" required/></label><label>Hugging Face token<input id="hf" type="password" autocomplete="off" required/></label><label>Private Hugging Face dataset (owner/name)<input id="dataset" placeholder="username/windows-golden-instance-layers" required pattern="[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+"/></label><label>RDP allowed public IP (CIDR)<input id="cidr" placeholder="203.0.113.10/32" required/></label><button class="primary">Create / configure workspace</button></form><div class="danger"><h3>Reset persistent data</h3><p>Deletes the configured Hugging Face dataset. Stop the instance first.</p><button id="reset" disabled>Delete persistent data</button></div></section><section id="activity"><p class="eyebrow">ACTIVITY</p><pre id="events" aria-live="polite"></pre></section></div><p id="message" role="status"></p></article></main><footer>Golden / Independent project. Use only authorized infrastructure and licensed images.</footer>
+<script>
+import sodium from 'libsodium-wrappers';
+const $=(id:string)=>document.getElementById(id)!;
+const input=(id:string)=>$(id) as HTMLInputElement;
+const button=(id:string)=>$(id) as HTMLButtonElement;
+let token=sessionStorage.getItem('golden.github')||'', owner='', repo='', run:any=null, endpoint='', configured=false, busy=false;
+const auth=import.meta.env.PUBLIC_AUTH_URL;
+function log(s:string){$('message').textContent=s;$('events').textContent=new Date().toLocaleTimeString()+'  '+s+'\n'+$('events').textContent;}
+async function api(path:string,method='GET',body?:unknown){const r=await fetch('https://api.github.com'+path,{method,headers:{Authorization:'Bearer '+token,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body)});if(!r.ok)throw Error(`${method} ${path}: ${r.status}`);return r.status===204?null:r.json();}
+const root=()=>`/repos/${owner}/${repo}`;
+async function relay(path:string,body:unknown){if(!auth)throw Error('Configure PUBLIC_AUTH_URL first');const r=await fetch(auth+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});if(!r.ok)throw Error('Authentication relay: '+r.status);return r.json();}
+const sleep=(ms:number)=>new Promise(r=>setTimeout(r,ms));
+async function act(fn:()=>Promise<void>){if(busy)return;busy=true;try{await fn()}catch(e){log(String(e))}finally{busy=false;}}
+function active(){return run && !['completed'].includes(run.status)}
+function controls(){console.log('[GOLDEN]', {configured, active: active(), status: run?.status});button('start').disabled=!configured||!!active();button('force').disabled=!active();button('stop').disabled=!active()||!endpoint;button('reset').disabled=!configured||!!active();button('copy').disabled=!endpoint;}
+async function refresh(){if(!repo)return;const existing=await api(root());configured=!!existing.id;const data=await api(root()+'/actions/workflows/windows-persistent.yml/runs?per_page=1');run=data.workflow_runs[0]||null;endpoint='';const link=$('runlink') as HTMLAnchorElement;link.hidden=!run;if(run)link.href=run.html_url;if(active()){try{const ref=await api(root()+'/git/ref/heads/golden-control');const commit=await api(root()+'/git/commits/'+ref.object.sha);const tree=await api(root()+'/git/trees/'+commit.tree.sha);const entry=tree.tree.find((x:any)=>x.path==='session.json');if(entry){const blob=await api(root()+'/git/blobs/'+entry.sha);const state=JSON.parse(atob(blob.content));if(String(state.run_id)===String(run.id)&&/^[a-zA-Z0-9.-]+:[0-9]+$/.test(state.endpoint))endpoint=state.endpoint;}}catch{}}
+const status = $('status');
+const state = !active() ? 'off' : endpoint ? 'on' : 'booting';
+status.textContent = {
+  off: 'OFF',
+  on: 'ON',
+  booting: 'Booting...'
+}[state];
+status.dataset.state = state;
+$('address').textContent=endpoint||'No active endpoint';controls();}
+async function secret(name:string,value:string){await sodium.ready;const key=await api(root()+'/actions/secrets/public-key');const encrypted=sodium.crypto_box_seal(sodium.from_string(value),sodium.from_base64(key.key,sodium.base64_variants.ORIGINAL));await api(root()+'/actions/secrets/'+name,'PUT',{encrypted_value:sodium.to_base64(encrypted,sodium.base64_variants.ORIGINAL),key_id:key.key_id});}
+async function variable(name:string,value:string){try{await api(root()+'/actions/variables/'+name,'PATCH',{name,value})}catch(e){if(!String(e).endsWith(': 404'))throw e;await api(root()+'/actions/variables','POST',{name,value})}}
+button('connect').onclick=()=>act(async()=>{const d=await relay('/device',{});$('device').hidden=false;$('code').textContent=d.user_code;let interval=d.interval||5;const end=Date.now()+d.expires_in*1000;while(Date.now()<end){await sleep(interval*1000);const t=await relay('/token',{device_code:d.device_code});if(t.error==='authorization_pending')continue;if(t.error==='slow_down'){interval+=5;continue}if(!t.access_token)throw Error(t.error||'Authorization failed');token=t.access_token;sessionStorage.setItem('golden.github',token);const user=await api('/user');owner=user.login;$('identity').textContent=owner;$('login').hidden=true;$('dashboard').hidden=false;button('logout').hidden=false;repo=input('repo').value;try{const existing=await api(root());if(existing.id){configured=true;await refresh()}}catch{}return}throw Error('Code expired')});
+button('logout').onclick=()=>{for(const key of ['github','ngrok','hf'])sessionStorage.removeItem('golden.'+key);location.reload();};
+$('setup').addEventListener('submit',e=>{e.preventDefault();void act(async()=>{repo=input('repo').value;configured=false;controls();let existing;try{existing=await api(root())}catch(e){if(!String(e).endsWith(': 404'))throw e;}if(!existing){await api('/repos/fox3000foxy/windows10-golden/generate','POST',{owner,name:repo,private:true,include_all_branches:false});for(let i=0;i<15;i++){try{existing=await api(root());break}catch{await sleep(2000)}}}if(!existing?.id)throw Error('Workspace not found');await secret('NGROK_AUTHTOKEN',input('ngrok').value);await secret('HF_TOKEN',input('hf').value);await variable('HF_REPO',input('dataset').value);await variable('RDP_ALLOWED_CIDR',input('cidr').value);sessionStorage.setItem('golden.ngrok',input('ngrok').value);sessionStorage.setItem('golden.hf',input('hf').value);configured=true;log('Workspace configured');await refresh()})});
+button('refresh').onclick=()=>act(refresh);
+button('start').onclick=()=>act(async()=>{await refresh();if(active())throw Error('Instance already active');await api(root()+'/actions/workflows/windows-persistent.yml/dispatches','POST',{ref:'main'});log('Start requested');await sleep(3000);await refresh()});
+button('force').onclick=()=>act(async()=>{if(!confirm('Force stop? Unsaved changes may be lost.'))return;await api(root()+`/actions/runs/${run.id}/cancel`,'POST');log('Cancellation requested');await refresh()});
+button('stop').onclick=()=>act(async()=>{if(!active())return;await api(root()+'/issues','POST',{title:`Golden shutdown ${run.id}`,body:'Request graceful shutdown of this run.'});log('Shutdown requested')});
+button('copy').onclick=()=>act(async()=>{await navigator.clipboard.writeText(endpoint);log('Address copied')});
+button('reset').onclick=()=>act(async()=>{await refresh();if(active())throw Error('Stop the instance first');const dataset=(await api(root()+'/actions/variables/HF_REPO')).value;if(prompt('Type '+dataset+' to permanently delete it')!==dataset)return;const hf=sessionStorage.getItem('golden.hf')||prompt('Enter a Hugging Face token authorized to delete this dataset');if(!hf)return;const r=await fetch('https://huggingface.co/api/repos/delete',{method:'DELETE',headers:{Authorization:'Bearer '+hf,'Content-Type':'application/json'},body:JSON.stringify({name:dataset.split('/')[1],organization:dataset.split('/')[0],type:'dataset'})});if(!r.ok)throw Error('Hugging Face deletion: '+r.status);log('Dataset deleted')});
+input("ngrok").value=sessionStorage.getItem("golden.ngrok")||"";
+input("hf").value=sessionStorage.getItem("golden.hf")||"";
+for(const id of ["repo","dataset","cidr"]){
+  input(id).value=localStorage.getItem("golden."+id)||input(id).value;
+  input(id).addEventListener("input",()=>localStorage.setItem("golden."+id,input(id).value));
+}
+if(token)void act(async()=>{
+  const user=await api("/user");
+  owner=user.login;
+  $("identity").textContent=owner;
+  $("login").hidden=true;
+  $("dashboard").hidden=false;
+  button("logout").hidden=false;
+  repo=input("repo").value;
+  const existing=await api(root());
+  if(existing.id){configured=true;await refresh();}
+});
+setInterval(()=>{if(configured&&!busy)void act(refresh)},10000);
+</script></body></html>
