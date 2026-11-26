@@ -29,8 +29,13 @@ jobs:
         env:
           PUBLIC_AUTH_URL: ${{ vars.PUBLIC_AUTH_URL || 'https://windows-golden-auth.fox3000foxy.workers.dev' }}
       - uses: actions/configure-pages@v5
+      # One artifact name per attempt, so "Re-run jobs" does not find two
+      # artifacts named github-pages in the same run.
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
+          name: github-pages-${{ github.run_attempt }}
       - uses: actions/deploy-pages@v4
         id: deploy
+        with:
+          artifact_name: github-pages-${{ github.run_attempt }}
