@@ -95,7 +95,7 @@ Integration constants (workflow file name, step names, branch, issue title, secr
 
 1. Create a GitHub OAuth App, enable Device Flow, and set its client ID in `worker/wrangler.toml`.
 2. Set `PANEL_ORIGIN` in `worker/wrangler.toml` to the Pages origin (for example `https://fox3000foxy.github.io`), then deploy: `cd worker && npx wrangler deploy`.
-3. In this repository, add an Actions variable `PUBLIC_AUTH_URL` with the worker URL.
+3. The deploy workflow uses `https://windows-golden-auth.fox3000foxy.workers.dev` by default. To use another relay, add an Actions variable (not a secret) named `PUBLIC_AUTH_URL` with its URL.
 4. Under Settings, Pages, select GitHub Actions as the source.
 5. Push to `main`. `.github/workflows/pages.yml` runs the type check, unit tests and build, then deploys.
 

@@ -27,7 +27,7 @@ jobs:
       - run: npm test
       - run: npm run build
         env:
-          PUBLIC_AUTH_URL: ${{ vars.PUBLIC_AUTH_URL }}
+          PUBLIC_AUTH_URL: ${{ vars.PUBLIC_AUTH_URL || 'https://windows-golden-auth.fox3000foxy.workers.dev' }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
