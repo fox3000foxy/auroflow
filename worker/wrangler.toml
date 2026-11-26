@@ -3,4 +3,4 @@ main = "index.js"
 compatibility_date = "2025-01-01"
 [vars]
 PANEL_ORIGIN = "https://fox3000foxy.github.io"
-GITHUB_CLIENT_ID = "Ov23liV1ST2dFKBLD7SU"
+GITHUB_CLIENT_ID = "REPLACE_ME"

@@ -12,7 +12,7 @@ import sodium from 'libsodium-wrappers';
 const $=(id:string)=>document.getElementById(id)!;
 const input=(id:string)=>$(id) as HTMLInputElement;
 const button=(id:string)=>$(id) as HTMLButtonElement;
-let token=sessionStorage.getItem('golden.github')||'', owner='', repo='', run:any=null, endpoint='', configured=false, busy=false;
+let token='', owner='', repo='', run:any=null, endpoint='', configured=false, busy=false;
 const auth=import.meta.env.PUBLIC_AUTH_URL;
 function log(s:string){$('message').textContent=s;$('events').textContent=new Date().toLocaleTimeString()+'  '+s+'\n'+$('events').textContent;}
 async function api(path:string,method='GET',body?:unknown){const r=await fetch('https://api.github.com'+path,{method,headers:{Authorization:'Bearer '+token,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body)});if(!r.ok)throw Error(`${method} ${path}: ${r.status}`);return r.status===204?null:r.json();}
@@ -21,44 +21,18 @@ async function relay(path:string,body:unknown){if(!auth)throw Error('Configure P
 const sleep=(ms:number)=>new Promise(r=>setTimeout(r,ms));
 async function act(fn:()=>Promise<void>){if(busy)return;busy=true;try{await fn()}catch(e){log(String(e))}finally{busy=false;}}
 function active(){return run && !['completed'].includes(run.status)}
-function controls(){console.log('[GOLDEN]', {configured, active: active(), status: run?.status});button('start').disabled=!configured||!!active();button('force').disabled=!active();button('stop').disabled=!active()||!endpoint;button('reset').disabled=!configured||!!active();button('copy').disabled=!endpoint;}
-async function refresh(){if(!repo)return;const existing=await api(root());configured=!!existing.id;const data=await api(root()+'/actions/workflows/windows-persistent.yml/runs?per_page=1');run=data.workflow_runs[0]||null;endpoint='';const link=$('runlink') as HTMLAnchorElement;link.hidden=!run;if(run)link.href=run.html_url;if(active()){try{const ref=await api(root()+'/git/ref/heads/golden-control');const commit=await api(root()+'/git/commits/'+ref.object.sha);const tree=await api(root()+'/git/trees/'+commit.tree.sha);const entry=tree.tree.find((x:any)=>x.path==='session.json');if(entry){const blob=await api(root()+'/git/blobs/'+entry.sha);const state=JSON.parse(atob(blob.content));if(String(state.run_id)===String(run.id)&&/^[a-zA-Z0-9.-]+:[0-9]+$/.test(state.endpoint))endpoint=state.endpoint;}}catch{}}
-const status = $('status');
-const state = !active() ? 'off' : endpoint ? 'on' : 'booting';
-status.textContent = {
-  off: 'OFF',
-  on: 'ON',
-  booting: 'Booting...'
-}[state];
-status.dataset.state = state;
-$('address').textContent=endpoint||'No active endpoint';controls();}
+function controls(){button('start').disabled=!configured||!!active();button('force').disabled=!active();button('stop').disabled=!active()||!endpoint;button('reset').disabled=!configured||!!active();button('copy').disabled=!endpoint;}
+async function refresh(){if(!repo)return;const data=await api(root()+'/actions/workflows/windows-persistent.yml/runs?per_page=1');run=data.workflow_runs[0]||null;endpoint='';$('status').textContent=run?run.status+(run.conclusion?' / '+run.conclusion:''):'Ready';const link=$('runlink') as HTMLAnchorElement;link.hidden=!run;if(run)link.href=run.html_url;if(active()){try{const ref=await api(root()+'/git/ref/heads/golden-control');const commit=await api(root()+'/git/commits/'+ref.object.sha);const tree=await api(root()+'/git/trees/'+commit.tree.sha);const entry=tree.tree.find((x:any)=>x.path==='session.json');if(entry){const blob=await api(root()+'/git/blobs/'+entry.sha);const state=JSON.parse(atob(blob.content));if(String(state.run_id)===String(run.id)&&/^[a-zA-Z0-9.-]+:[0-9]+$/.test(state.endpoint))endpoint=state.endpoint;}}catch{}}$('address').textContent=endpoint||'No active endpoint';controls();}
 async function secret(name:string,value:string){await sodium.ready;const key=await api(root()+'/actions/secrets/public-key');const encrypted=sodium.crypto_box_seal(sodium.from_string(value),sodium.from_base64(key.key,sodium.base64_variants.ORIGINAL));await api(root()+'/actions/secrets/'+name,'PUT',{encrypted_value:sodium.to_base64(encrypted,sodium.base64_variants.ORIGINAL),key_id:key.key_id});}
 async function variable(name:string,value:string){try{await api(root()+'/actions/variables/'+name,'PATCH',{name,value})}catch(e){if(!String(e).endsWith(': 404'))throw e;await api(root()+'/actions/variables','POST',{name,value})}}
-button('connect').onclick=()=>act(async()=>{const d=await relay('/device',{});$('device').hidden=false;$('code').textContent=d.user_code;let interval=d.interval||5;const end=Date.now()+d.expires_in*1000;while(Date.now()<end){await sleep(interval*1000);const t=await relay('/token',{device_code:d.device_code});if(t.error==='authorization_pending')continue;if(t.error==='slow_down'){interval+=5;continue}if(!t.access_token)throw Error(t.error||'Authorization failed');token=t.access_token;sessionStorage.setItem('golden.github',token);const user=await api('/user');owner=user.login;$('identity').textContent=owner;$('login').hidden=true;$('dashboard').hidden=false;button('logout').hidden=false;repo=input('repo').value;try{const existing=await api(root());if(existing.id){configured=true;await refresh()}}catch{}return}throw Error('Code expired')});
-button('logout').onclick=()=>{for(const key of ['github','ngrok','hf'])sessionStorage.removeItem('golden.'+key);location.reload();};
-$('setup').addEventListener('submit',e=>{e.preventDefault();void act(async()=>{repo=input('repo').value;configured=false;controls();let existing;try{existing=await api(root())}catch(e){if(!String(e).endsWith(': 404'))throw e;}if(!existing){await api('/repos/fox3000foxy/windows10-golden/generate','POST',{owner,name:repo,private:true,include_all_branches:false});for(let i=0;i<15;i++){try{existing=await api(root());break}catch{await sleep(2000)}}}if(!existing?.id)throw Error('Workspace not found');await secret('NGROK_AUTHTOKEN',input('ngrok').value);await secret('HF_TOKEN',input('hf').value);await variable('HF_REPO',input('dataset').value);await variable('RDP_ALLOWED_CIDR',input('cidr').value);sessionStorage.setItem('golden.ngrok',input('ngrok').value);sessionStorage.setItem('golden.hf',input('hf').value);configured=true;log('Workspace configured');await refresh()})});
+button('connect').onclick=()=>act(async()=>{const d=await relay('/device',{});$('device').hidden=false;$('code').textContent=d.user_code;let interval=d.interval||5;const end=Date.now()+d.expires_in*1000;while(Date.now()<end){await sleep(interval*1000);const t=await relay('/token',{device_code:d.device_code});if(t.error==='authorization_pending')continue;if(t.error==='slow_down'){interval+=5;continue}if(!t.access_token)throw Error(t.error||'Authorization failed');token=t.access_token;const user=await api('/user');owner=user.login;$('identity').textContent=owner;$('login').hidden=true;$('dashboard').hidden=false;button('logout').hidden=false;repo=input('repo').value;try{const existing=await api(root());if(existing.private){configured=true;await refresh()}}catch{}return}throw Error('Code expired')});
+button('logout').onclick=()=>location.reload();
+$('setup').addEventListener('submit',e=>{e.preventDefault();void act(async()=>{repo=input('repo').value;configured=false;controls();let existing;try{existing=await api(root())}catch(e){if(!String(e).endsWith(': 404'))throw e;}if(!existing){await api('/repos/fox3000foxy/windows10-golden/generate','POST',{owner,name:repo,private:true,include_all_branches:false});for(let i=0;i<15;i++){try{existing=await api(root());break}catch{await sleep(2000)}}}if(!existing?.private)throw Error('A private workspace is required');await secret('NGROK_AUTHTOKEN',input('ngrok').value);await secret('HF_TOKEN',input('hf').value);await variable('HF_REPO',input('dataset').value);await variable('RDP_ALLOWED_CIDR',input('cidr').value);input('ngrok').value='';input('hf').value='';configured=true;log('Workspace configured');await refresh()})});
 button('refresh').onclick=()=>act(refresh);
-button('start').onclick=()=>act(async()=>{await refresh();if(active())throw Error('Instance already active');await api(root()+'/actions/workflows/windows-persistent.yml/dispatches','POST',{ref:'main'});log('Start requested');await sleep(3000);await refresh()});
+button('start').onclick=()=>act(async()=>{await refresh();if(active())throw Error('Instance already active');const protocol=await api(root()+'/contents/golden-panel-protocol.txt');if(atob(protocol.content).trim()!=='1')throw Error('Compatible engine required');await api(root()+'/actions/workflows/windows-persistent.yml/dispatches','POST',{ref:'main'});log('Start requested');await sleep(3000);await refresh()});
 button('force').onclick=()=>act(async()=>{if(!confirm('Force stop? Unsaved changes may be lost.'))return;await api(root()+`/actions/runs/${run.id}/cancel`,'POST');log('Cancellation requested');await refresh()});
 button('stop').onclick=()=>act(async()=>{if(!active())return;await api(root()+'/issues','POST',{title:`Golden shutdown ${run.id}`,body:'Request graceful shutdown of this run.'});log('Shutdown requested')});
 button('copy').onclick=()=>act(async()=>{await navigator.clipboard.writeText(endpoint);log('Address copied')});
-button('reset').onclick=()=>act(async()=>{await refresh();if(active())throw Error('Stop the instance first');const dataset=(await api(root()+'/actions/variables/HF_REPO')).value;if(prompt('Type '+dataset+' to permanently delete it')!==dataset)return;const hf=sessionStorage.getItem('golden.hf')||prompt('Enter a Hugging Face token authorized to delete this dataset');if(!hf)return;const r=await fetch('https://huggingface.co/api/repos/delete',{method:'DELETE',headers:{Authorization:'Bearer '+hf,'Content-Type':'application/json'},body:JSON.stringify({name:dataset.split('/')[1],organization:dataset.split('/')[0],type:'dataset'})});if(!r.ok)throw Error('Hugging Face deletion: '+r.status);log('Dataset deleted')});
-input("ngrok").value=sessionStorage.getItem("golden.ngrok")||"";
-input("hf").value=sessionStorage.getItem("golden.hf")||"";
-for(const id of ["repo","dataset","cidr"]){
-  input(id).value=localStorage.getItem("golden."+id)||input(id).value;
-  input(id).addEventListener("input",()=>localStorage.setItem("golden."+id,input(id).value));
-}
-if(token)void act(async()=>{
-  const user=await api("/user");
-  owner=user.login;
-  $("identity").textContent=owner;
-  $("login").hidden=true;
-  $("dashboard").hidden=false;
-  button("logout").hidden=false;
-  repo=input("repo").value;
-  const existing=await api(root());
-  if(existing.id){configured=true;await refresh();}
-});
+button('reset').onclick=()=>act(async()=>{await refresh();if(active())throw Error('Stop the instance first');const dataset=(await api(root()+'/actions/variables/HF_REPO')).value;if(prompt('Type '+dataset+' to permanently delete it')!==dataset)return;const hf=prompt('Enter a Hugging Face token authorized to delete this dataset');if(!hf)return;const r=await fetch('https://huggingface.co/api/repos/delete',{method:'DELETE',headers:{Authorization:'Bearer '+hf,'Content-Type':'application/json'},body:JSON.stringify({name:dataset.split('/')[1],organization:dataset.split('/')[0],type:'dataset'})});if(!r.ok)throw Error('Hugging Face deletion: '+r.status);log('Dataset deleted')});
 setInterval(()=>{if(configured&&!busy)void act(refresh)},10000);
 </script></body></html>
