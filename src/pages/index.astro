@@ -157,6 +157,63 @@ const steps = [
     </section>
 
 
+    <section class="band" aria-labelledby="golden-images">
+      <div class="band__inner band__inner--split">
+        <header class="band__head">
+          <h2 id="golden-images">Understanding Golden Images</h2>
+          <p>One verified base image. As many persistent sessions as you need.</p>
+        </header>
+
+        <div>
+          <div class="prose">
+            <p>
+              A Golden Image is a prepared virtual disk that serves as the
+              starting point for a virtual machine. It contains the operating
+              system, installed software and initial configuration.
+            </p>
+            <p>
+              Instead of modifying this base disk, AuroFlow creates a writable
+              QCOW2 overlay for each session. Your changes are saved in
+              incremental layers, while the original Golden Image remains
+              unchanged.
+            </p>
+          </div>
+
+          <ol class="steps">
+            <li class="steps__item">
+              <span class="steps__index" aria-hidden="true">1</span>
+              <h3>Verified foundation</h3>
+              <p>The image is validated using SHA-256 and QEMU image checks before use.</p>
+            </li>
+            <li class="steps__item">
+              <span class="steps__index" aria-hidden="true">2</span>
+              <h3>Read-only base</h3>
+              <p>The original disk stays untouched. A separate overlay records modifications.</p>
+            </li>
+            <li class="steps__item">
+              <span class="steps__index" aria-hidden="true">3</span>
+              <h3>Persistent changes</h3>
+              <p>After a clean shutdown, the overlay is compressed, verified and saved to your private Hugging Face dataset.</p>
+            </li>
+            <li class="steps__item">
+              <span class="steps__index" aria-hidden="true">4</span>
+              <h3>Controlled updates</h3>
+              <p>Existing layers remain tied to their original base image. Changing the Golden Image requires a compatible migration or rebase.</p>
+            </li>
+          </ol>
+
+          <div class="prose">
+            <p class="prose__note">
+              AuroFlow provides a reference Windows 10 IoT Enterprise LTSC 2021
+              image, or you can import your own compatible QCOW2 disk.
+              A Golden Image is a reusable starting point, not a backup
+              of every subsequent session.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section class="band" aria-labelledby="custom-golden">
       <div class="band__inner band__inner--split">
         <header class="band__head">
