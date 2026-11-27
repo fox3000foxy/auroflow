@@ -11,7 +11,6 @@ const sections = [
   { id: 'account', label: 'Account' },
   { id: 'workspace', label: 'Workspace' },
   { id: 'credentials', label: 'Credentials' },
-  { id: 'network', label: 'Network' },
   { id: 'validation', label: 'Validation' },
   { id: 'danger', label: 'Danger zone' },
 ];
@@ -154,7 +153,7 @@ const sections = [
             </section>
 
             <!-- Network -->
-            <section class="section" id="network" aria-labelledby="network-title">
+            <section hidden class="section" id="network" aria-labelledby="network-title">
               <div class="section__intro">
                 <h2 class="section__title" id="network-title">Network</h2>
                 <p class="section__text">Restricting which addresses can reach the RDP tunnel depends on the engine version in your workspace.</p>
