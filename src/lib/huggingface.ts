@@ -13,7 +13,7 @@ export interface HfTreeEntry {
   type: 'file' | 'directory';
   path: string;
   size?: number;
-  lfs?: { size: number };
+  lfs?: { size: number; oid?: string };
 }
 
 export interface DatasetUsage {
@@ -32,7 +32,7 @@ export class HuggingFaceClient {
         method: init.method ?? 'GET',
         cache: 'no-store',
         headers: {
-          Authorization: `Bearer ${this.token}`,
+          ...(this.token ? { Authorization: `Bearer ${this.token}` } : {}),
           ...(init.body === undefined ? {} : { 'Content-Type': 'application/json' }),
         },
         body: init.body === undefined ? undefined : JSON.stringify(init.body),
@@ -51,6 +51,46 @@ export class HuggingFaceClient {
     }
     const text = await response.text();
     return (text ? JSON.parse(text) : null) as T;
+  }
+
+  async goldenChecksum(value: string): Promise<string> {
+    const url = new URL(value);
+    const parts = url.pathname.split('/').filter(Boolean);
+
+    if (
+      url.origin !== 'https://huggingface.co' ||
+      url.username || url.password ||
+      url.search || url.hash ||
+      parts.length < 6 ||
+      parts[0] !== 'datasets' ||
+      !['blob', 'resolve'].includes(parts[3])
+    ) {
+      throw new Error('Invalid Hugging Face dataset URL.');
+    }
+
+    const [owner, repo, revision] = [parts[1], parts[2], parts[4]];
+    const filename = parts.slice(5).map(decodeURIComponent).join('/');
+
+    if (!filename.toLowerCase().endsWith('.qcow2')) {
+      throw new Error('Expected a QCOW2 image.');
+    }
+
+    const directory = parts.slice(5, -1).join('/');
+    const entries = await this.request<HfTreeEntry[]>(
+      `/api/datasets/${owner}/${repo}/tree/${revision}${directory ? '/' + directory : ''}`
+    );
+
+    const entry = entries.find(
+      (item) => item.type === 'file' && item.path === filename
+    );
+
+    const hash = entry?.lfs?.oid;
+
+    if (!hash || !/^[a-f0-9]{64}$/i.test(hash)) {
+      throw new Error('SHA-256 checksum unavailable. Enter it manually.');
+    }
+
+    return hash.toLowerCase();
   }
 
   whoami(): Promise<{ name: string; type: string; auth?: { accessToken?: { role?: string } } }> {

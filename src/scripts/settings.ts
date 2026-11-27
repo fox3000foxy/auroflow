@@ -376,7 +376,52 @@ async function onDeleteDataset() {
 
 /* ---------------- Section index ---------------- */
 
+async function fetchGoldenHash() {
+  const button = $('[data-fetch-golden-hash]') as HTMLButtonElement;
+  const urlField = input('[data-golden-url]');
+  const hashField = input('[data-golden-hash]');
+  const url = urlField.value.trim();
+
+  if (!url) {
+    setFieldError('goldenUrl', 'Enter a Hugging Face image URL first.');
+    return;
+  }
+
+  button.disabled = true;
+  button.setAttribute('aria-busy', 'true');
+  setFieldError('goldenUrl', null);
+  setFieldError('goldenHash', null);
+
+  try {
+    const token = input('[data-hf-input]').value.trim()
+      || credentials.huggingFace()
+      || '';
+
+    const hf = new HuggingFaceClient(token);
+    const hash = await hf.goldenChecksum(url);
+
+    if (urlField.value.trim() !== url) return;
+
+    hashField.value = hash;
+    urlField.value = url.replace('/blob/', '/resolve/');
+    toast('Golden Image checksum retrieved.', 'success');
+  } catch (error) {
+    setFieldError('goldenHash', describe(error));
+  } finally {
+    button.disabled = false;
+    button.removeAttribute('aria-busy');
+  }
+}
+
 function bindIndex() {
+  $('[data-fetch-golden-hash]').addEventListener(
+    'click', () => void fetchGoldenHash()
+  );
+
+  input('[data-golden-url]').addEventListener('input', () => {
+    input('[data-golden-hash]').value = '';
+  });
+
   const links = $$('[data-index-link]');
   const sections = links.map((link) => document.getElementById(link.dataset.indexLink!)).filter((s): s is HTMLElement => !!s);
   const observer = new IntersectionObserver(

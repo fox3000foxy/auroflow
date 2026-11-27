@@ -176,10 +176,13 @@ const sections = [
 
                 <label class="field">
                   <span class="field__label">SHA-256 checksum</span>
+                  <span class="input-group">
                   <input class="input input--mono"
                     name="goldenHash" data-golden-hash
                     placeholder="64 hexadecimal characters"
                     autocomplete="off" spellcheck="false" />
+                    <button class="btn" type="button" data-fetch-golden-hash>Fetch checksum</button>
+                  </span>
                   <span class="field__hint">
                     Required for custom images.
                   </span>
