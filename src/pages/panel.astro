@@ -112,8 +112,8 @@ const stages = ['Runner', 'Dataset', 'Golden Image', 'Layers', 'Boot', 'Tunnel',
       <div class="notice notice--warn" data-public-warning hidden>
         <Icon name="globe" />
         <div>
-          <p><strong>This workspace is public.</strong> Encrypted sessions hide the RDP address in <code>session.json</code>. Older sessions, logs and other leaks may still expose it. Encryption does not prevent connections to a discovered endpoint.</p>
-          <p>The reference image has a passwordless account and ngrok does not authenticate RDP clients. Set a strong Windows password before connecting, or make the workspace private in <a href={href('/settings/#workspace')}>Settings</a>.</p>
+          <p><strong>This workspace is public.</strong> Compatible encrypted sessions conceal the RDP address in <code>session.json</code>. Legacy sessions and other disclosures can still expose an endpoint. Encryption does not authenticate clients or hide a discoverable TCP port.</p>
+          <p>The reference Windows account is passwordless and ngrok does not authenticate RDP clients. Set a strong Windows password. Your private decryption key belongs to this browser and is lost if its site data is cleared. Review workspace visibility in <a href={href('/settings/#workspace')}>Settings</a>.</p>
         </div>
       </div>
 

@@ -218,8 +218,7 @@ import { href } from '../lib/paths';
         constitute end-to-end encryption.
       </p>
       <p>
-        Public GitHub workspaces may expose connection
-        endpoints, workflow metadata and operational logs.
+        Public GitHub workspaces may expose workflow metadata and operational logs. On compatible encrypted sessions, the published RDP endpoint is encrypted with the workspace public key. Earlier or independently disclosed endpoints may remain visible.
       </p>
     </section>
 
@@ -324,12 +323,12 @@ import { href } from '../lib/paths';
 
     <section>
       <h2 id="detailed-browser-storage-inventory">15. Detailed browser storage inventory</h2>
-      <p>The application uses the golden-panel.v2 namespace to organize browser storage.</p>
+      <p>The application uses the golden-panel.v2 namespace for most browser storage. Per-workspace RDP session private keys use a separate auroflow.session-key.v1. prefix in localStorage.</p>
       <p>The github entry contains the OAuth access token, account login and timestamps used for session restoration. It is stored in sessionStorage by default or localStorage when persistent sign-in is selected.</p>
       <p>The hf entry may contain a Hugging Face access token in sessionStorage.</p>
       <p>The workspace entry contains the selected repository owner and name in localStorage.</p>
       <p>Entries beginning with dispatch. contain timestamps used to reduce duplicate workflow launches across browser tabs.</p>
-      <p>Entries beginning with activity. contain local operational messages and timestamps, limited to the latest 60 entries per workspace.</p>
+      <p>Entries beginning with activity. contain local operational messages and timestamps, limited to the latest 60 entries per workspace. AuroFlow session encryption generates a per-workspace Curve25519 private key in the browser. Its corresponding public key is stored as a GitHub Actions repository variable, and the session endpoint is sealed before being committed to the control branch. The private key is not derived from the GitHub OAuth token.</p>
       <p>The cancel entry contains up to ten workflow run identifiers associated with cancellation requests from the current tab.</p>
       <p>A temporary legacyRepo entry may be used to migrate a repository preference from an earlier version of the panel.</p>
       <p>These entries are intended for application functionality rather than advertising, profiling or cross-site behavioral tracking.</p>
@@ -365,7 +364,7 @@ import { href } from '../lib/paths';
     <section>
       <h2 id="public-repositories-and-disclosure">19. Public repositories and disclosure</h2>
       <p>New instance repositories are private by default in the standard setup.</p>
-      <p>Users may choose to change repository visibility. A public repository may expose its source code, commit history, workflow logs, issues, operational metadata and Remote Desktop connection information.</p>
+      <p>Users may choose to change repository visibility. A public repository may expose its source code, commit history, workflow logs, issues and operational metadata. Compatible encrypted sessions publish a ciphertext endpoint rather than its plaintext address, but legacy sessions and other disclosures may still reveal connection information.</p>
       <p>Changing a repository back to private does not necessarily remove information previously copied, cached or otherwise obtained by third parties.</p>
       <p>Repository visibility does not determine the privacy of the associated Hugging Face dataset. The persistence dataset must remain private.</p>
       <p>Users should review repository contents and security settings before making any workspace public.</p>

@@ -100,12 +100,12 @@ const sections = [
                     <label class="choice">
                       <input type="radio" name="visibility" value="private" checked />
                       <span class="choice__title">Private</span>
-                      <span class="choice__body">The endpoint and workflow logs are visible to you and collaborators only. Actions minutes count against your plan.</span>
+                      <span class="choice__body">Workflow logs and metadata are visible to you and collaborators only. Compatible encrypted sessions protect the published endpoint regardless of visibility. Actions minutes count against your plan.</span>
                     </label>
                     <label class="choice">
                       <input type="radio" name="visibility" value="public" />
                       <span class="choice__title">Public</span>
-                      <span class="choice__body">Anyone can read the RDP endpoint from the control branch and the workflow annotations.</span>
+                      <span class="choice__body">Anyone can read workflow logs and metadata. Compatible encrypted sessions publish ciphertext, but legacy runs and other disclosures can reveal endpoints.</span>
                     </label>
                   </div>
                 </div>
@@ -113,8 +113,8 @@ const sections = [
                 <div class="notice notice--warn" data-public-notice hidden>
                   <Icon name="globe" />
                   <div>
-                    <p><strong>A public workspace publishes your RDP endpoint.</strong> The reference Windows image has a passwordless account and ngrok does not authenticate RDP clients, so anyone who reads the address can try to connect.</p>
-                    <p>Before starting a public instance, set a strong Windows password through a trusted connection. Secrets stay encrypted in either case.</p>
+                    <p><strong>This workspace is public.</strong> Compatible encrypted sessions keep the RDP address out of <code>session.json</code>. Older runs and other disclosures may still reveal it. Anyone who discovers the address may attempt to connect.</p>
+                    <p>The reference Windows account is passwordless and ngrok does not authenticate RDP clients. Set a strong Windows password. The private endpoint key remains in this browser; losing local site data can make an active encrypted session inaccessible.</p>
                   </div>
                 </div>
               </div>

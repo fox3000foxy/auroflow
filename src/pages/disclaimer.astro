@@ -130,10 +130,7 @@ import '../styles/legal.css';
         Desktop clients.
       </p>
       <p>
-        Public workspaces may expose Remote Desktop
-        endpoints through repository files and workflow
-        logs. Private repositories do not, by themselves,
-        prevent unauthorized network access.
+        Compatible encrypted sessions conceal the published Remote Desktop endpoint, but public workspaces expose workflow data and older sessions or independent logs may reveal network details. Endpoint encryption is not RDP authentication, and private repositories do not, by themselves, prevent unauthorized network access.
       </p>
       <p>
         Users must configure appropriate authentication,
@@ -297,7 +294,7 @@ import '../styles/legal.css';
       <p>Eligible public repositories may receive different runner specifications and billing treatment from private repositories under GitHub's current policies.</p>
       <p>Public repository visibility does not authorize workloads that would otherwise violate GitHub Actions terms or acceptable use restrictions.</p>
       <p>Users must independently assess whether their intended workloads are permitted. Repository visibility must not be used as a mechanism to evade applicable restrictions.</p>
-      <p>Making a repository public may expose operational logs, repository history and active connection endpoints. Appropriate authentication and network protections must be established before exposing a virtual machine.</p>
+      <p>Making a repository public exposes operational logs and repository history. Encrypted sessions conceal the newly published endpoint in the control file, but older runs, logs or independent disclosures may reveal connection details. Appropriate RDP authentication and network protections remain necessary.</p>
     </section>
 
     <section>

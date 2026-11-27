@@ -3,7 +3,8 @@ const features = [
   { id: 'custom-golden', label: '01 / IMPORT', title: 'Bring your own disk', body: 'Reuse a compatible local QCOW2 installation or start with the reference Windows image.', mark: 'QCOW2' },
   { id: 'what', label: '02 / COMPUTE', title: 'On-demand compute', body: 'QEMU with KVM acceleration on ephemeral runners.', mark: 'KVM' },
   { id: 'persistence', label: '03 / STORAGE', title: 'Persistent by design', body: 'Save changes as incremental disk layers on Hugging Face.', mark: 'LAYERS' },
-  { id: 'start', label: '04 / ACCESS', title: 'Remote Desktop', body: 'Connect to your running instance through RDP and ngrok.', mark: 'RDP' },
+  { id: 'encrypted-access', label: '04 / PRIVACY', title: 'Encrypted RDP endpoints', body: 'Connection addresses are sealed before publication and decrypted only in your browser.', mark: 'SEALED' },
+  { id: 'start', label: '05 / ACCESS', title: 'Remote Desktop', body: 'Connect through your RDP client and an ngrok TCP tunnel.', mark: 'RDP' },
 ];
 ---
 <section class="af-features" aria-labelledby="af-features-title">

@@ -48,7 +48,7 @@ const lifecycle = [
   },
   {
     title: 'Boot and open the tunnel',
-    body: 'Windows boots with its saved UEFI and TPM state. Once Remote Desktop answers, ngrok opens a TCP tunnel and the endpoint is written to session.json on the golden-control branch.',
+    body: 'Windows boots with its saved UEFI and TPM state. Once Remote Desktop answers, ngrok opens a TCP tunnel. The engine encrypts its endpoint using the workspace public key before publishing it to session.json on the golden-control branch.',
   },
   {
     title: 'Work',
@@ -79,7 +79,7 @@ const steps = [
   },
   {
     title: 'Start and connect',
-    body: 'Start the instance from the panel. When the status turns ON, copy the endpoint into your RDP client without the tcp:// prefix.',
+    body: 'Start the instance from the panel. AuroFlow saves a workspace public key in GitHub Actions variables and keeps the private key in this browser. Once the tunnel is ready, the panel decrypts the RDP endpoint locally.',
   },
   {
     title: 'Shut down to save',
@@ -90,7 +90,7 @@ const steps = [
 
 <BaseLayout
   title="AuroFlow | Ephemeral compute. Persistent state."
-  description="Deploy your own QCOW2 disk or use our reference Windows 10 IoT Enterprise LTSC 2021 image. On-demand cloud virtualization with remote access and persistent storage."
+  description="Run your own QCOW2 image or reference Windows VM with encrypted RDP endpoint publishing, browser-side decryption and persistent cloud storage."
   page="home"
   bodyClass="home"
 >
@@ -104,7 +104,7 @@ const steps = [
         <HomeVisual />
         <div class="hero__foot">
           <p class="hero__lede">
-            On-demand virtual machines powered by GitHub Actions. Automated deployment, remote access and persistent storage across ephemeral runners.
+            On-demand virtual machines powered by GitHub Actions, with persistent storage, encrypted RDP endpoint publishing and browser-side decryption.
           </p>
           <div class="hero__actions">
             <a class="btn btn--primary btn--lg" href={href('/panel/')}>Open the panel</a>
@@ -229,6 +229,35 @@ const steps = [
       </div>
     </section>
 
+    <section class="band band--encrypted-access" aria-labelledby="encrypted-access">
+      <div class="band__inner band__inner--split">
+        <header class="band__head">
+          <h2 id="encrypted-access">Encrypted Remote Desktop endpoints</h2>
+          <p>Only your browser can decrypt the connection address published for a compatible AuroFlow session.</p>
+        </header>
+        <div>
+          <ol class="steps steps--encryption">
+            <li class="steps__item">
+              <span class="steps__index" aria-hidden="true">1</span>
+              <h3>A key pair in your browser</h3>
+              <p>The panel generates a separate Curve25519 key pair for each workspace. Your private key stays in localStorage; the public key is registered as a GitHub Actions variable.</p>
+            </li>
+            <li class="steps__item">
+              <span class="steps__index" aria-hidden="true">2</span>
+              <h3>Encrypted before publication</h3>
+              <p>The engine uses the public key to encrypt the ngrok address before publishing the session metadata to the repository. The plaintext address is not included in the new session file.</p>
+            </li>
+            <li class="steps__item">
+              <span class="steps__index" aria-hidden="true">3</span>
+              <h3>Decrypted locally</h3>
+              <p>The panel fetches the encrypted value and decrypts it in the same browser. It then prepares the address for your RDP client.</p>
+            </li>
+          </ol>
+          <p class="prose__note">Endpoint encryption prevents casual disclosure through the session file, not network discovery or unauthorized RDP connections. The reference Windows account has no password; protect Windows with a strong password. Old sessions and independent logs may contain previously disclosed addresses. Losing this browser's private key prevents decrypting an existing encrypted session.</p>
+        </div>
+      </div>
+    </section>
+
     <section class="band" aria-labelledby="lifecycle">
       <div class="band__inner band__inner--split">
         <header class="band__head">
@@ -331,10 +360,11 @@ const steps = [
             Repository visibility can be changed from Settings.
           </p>
           <p>
-            Public repositories expose workflow logs and
-            Remote Desktop endpoints. Secure your Windows
-            account and network access before changing
-            repository visibility.
+            Public repositories expose workflow logs and metadata.
+            Encrypted sessions conceal the RDP endpoint in
+            session.json, but legacy runs or other disclosures
+            may reveal connection details. Always secure Windows
+            before enabling remote access.
           </p>
           <p>
             Your Hugging Face persistence dataset must
@@ -362,11 +392,12 @@ const steps = [
           <ul class="facts">
             <li><strong>Remote Desktop is not authenticated by ngrok.</strong> The ngrok token authorises the tunnel agent, not RDP clients. Anyone with the endpoint can reach the Windows login screen.</li>
             <li><strong>The reference account has no password.</strong> Set a strong password through a trusted connection before relying on any endpoint.</li>
-            <li><strong>Public workspaces publish the endpoint.</strong> session.json and the workflow annotations are readable by anyone. Use a private repository when you can.</li>
+            <li><strong>Encrypted endpoint publishing.</strong> On compatible Engines, the RDP endpoint is encrypted before it reaches the public control branch. The private decryption key remains in the launching browser. This does not authenticate RDP clients or erase previously exposed endpoints.</li>
             <li><strong>Force stop discards the session.</strong> Cancelling the run skips the save step.</li>
           </ul>
           <ul class="facts">
-            <li><strong>Tokens stay out of the repository.</strong> They are sealed in the browser with the repository key and stored as Actions secrets. The GitHub token is kept in the browser tab by default, with optional persistent sign-in for up to seven days.</li>
+            <li><strong>Separate encryption keys.</strong> The RDP endpoint uses a per-workspace Curve25519 key pair, independent of your GitHub token. The public key is saved as an Actions variable; the private key remains in this browser's localStorage. Clearing site data or changing browsers may prevent access to an already running session.</li>
+            <li><strong>Tokens stay out of the repository.</strong> ngrok and Hugging Face tokens are sealed in the browser with the repository key and stored as Actions secrets. The GitHub token stays in the browser tab by default, with optional persistent sign-in for up to seven days.</li>
             <li><strong>The OAuth scope is broad.</strong> Device Flow requests <code>repo</code> and <code>workflow</code>, which reach all your repositories. A dedicated GitHub account limits the impact.</li>
             <li><strong>Sessions are time limited.</strong> Runs stop after {WORKFLOW_TIMEOUT_MIN} minutes; the engine powers Windows down at {AUTO_SHUTDOWN_MIN} minutes to leave time for the save.</li>
             <li><strong>Licensing is yours.</strong> The reference install was activated with MAS, which is not a Windows license. Use runners according to GitHub's terms.</li>
