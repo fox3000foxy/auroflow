@@ -338,7 +338,7 @@ export class GitHubClient {
       method: 'POST',
       body: {
         title: shutdownIssueTitle(runId),
-        body: `Graceful shutdown requested from AuroFlow Panel for workflow run ${runId}.\n\nThe engine polls this issue, sends an ACPI power-down to Windows and saves the persistent layers before the run completes.`,
+        body: `Graceful shutdown requested from AuroFlow for workflow run ${runId}.\n\nThe engine polls this issue, sends an ACPI power-down to Windows and saves the persistent layers before the run completes.`,
       },
     });
   }

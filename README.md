@@ -1,4 +1,4 @@
-# AuroFlow Panel
+# AuroFlow
 
 > Ephemeral compute. Persistent state.
 >
