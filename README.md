@@ -6,17 +6,18 @@
 
 Static web application for [AuroFlow](https://github.com/fox3000foxy/auroflow-engine): on-demand Windows 10 IoT Enterprise LTSC 2021 virtual machines running under QEMU/KVM on GitHub Actions, reachable over RDP through ngrok, with persistent storage as compressed QCOW2 layers in a private Hugging Face dataset.
 
-The panel has no backend of its own. It talks to the GitHub REST API and the Hugging Face API directly from the browser. A small Cloudflare Worker (`worker/`) relays GitHub Device Flow, because GitHub's OAuth endpoints do not accept browser CORS requests.
+The Dashboard has no application backend of its own. It talks to the GitHub REST API and the Hugging Face API directly from the browser. A small Cloudflare Worker (`worker/`) relays GitHub Device Flow, because GitHub's OAuth endpoints do not accept browser CORS requests.
 
 ## Pages
 
 | Path | Purpose |
 |---|---|
 | `/` | Project overview: what runs, architecture diagram, session lifecycle, persistence, getting started, security notes. |
-| `/panel/` | VM dashboard: status, RDP endpoint, start, graceful shutdown, force stop, lifecycle, activity, compute and storage. |
+| `/dashboard/` | VM dashboard: status, RDP endpoint, start, graceful shutdown, force stop, lifecycle, activity, compute and storage. |
+| `/panel/` | Legacy URL redirecting to `/dashboard/`. |
 | `/settings/` | Sign-in, workspace repository and visibility, ngrok and Hugging Face credentials, network restriction, validation, danger zone. |
 
-## How the panel reads VM state
+## How the Dashboard reads VM state
 
 The VM status is derived from the steps of the active workflow run (`GET /actions/runs/{id}/jobs`), not from the run status alone:
 
@@ -29,11 +30,11 @@ The VM status is derived from the steps of the active workflow run (`GET /action
 | Saving... (blue) | *Save persistent layers* is running. |
 | Stopping... (orange) | Force stop was requested from this browser. |
 
-The endpoint is displayed only when `session.json` has the current `run_id` and a valid `host:port`. Endpoints of completed or cancelled runs are never shown. The panel distinguishes a missing control branch, a stale session from another run, a malformed file and an API error, and shows each differently. GitHub Actions status is kept as secondary information in its own panel.
+The endpoint is displayed only when `session.json` belongs to the active `run_id`, uses schema version 3 and its `encrypted_endpoint` can be decrypted with the browser's workspace-specific private key. The engine never publishes a plaintext RDP endpoint in the current session file. Endpoints of completed or cancelled runs are never shown. The Dashboard distinguishes a missing control branch, a stale session from another run, a malformed file and an API error, and shows each differently. GitHub Actions status is kept as secondary information in its own panel.
 
 ### Connecting
 
-When the endpoint is available, the panel offers three ways to connect:
+When the decrypted endpoint is available, the Dashboard offers three ways to connect:
 
 - **Copy**: the `host:port` address, for any RDP client.
 - **Download .rdp**: a connection file generated in the browser (`full address:s:host:port`, no credentials). Remote Desktop Connection opens it on Windows, Windows App on macOS and Remmina on Linux.
@@ -48,7 +49,8 @@ Duplicate launches are prevented by checking for active runs before dispatching 
 - **GitHub token**: kept in `sessionStorage`, scoped to the browser tab, expires after 8 hours of inactivity. Users can opt in to "Stay signed in on this browser", which keeps it in `localStorage` for up to 7 days. Sign-out clears both.
 - **ngrok token**: sealed in the browser with the repository public key (libsodium `crypto_box_seal`) and stored as the `NGROK_AUTHTOKEN` Actions secret. Never stored in the browser.
 - **Hugging Face token**: sealed into the `HF_TOKEN` secret. Optionally kept in `sessionStorage` (on by default, clearable) so the panel can show layer details and delete the dataset without asking again.
-- Storage keys are namespaced (`golden-panel.v2.*`), because every GitHub Pages project of an account shares the `<user>.github.io` origin. Unnamespaced keys from the first prototype are removed on load.
+- **Session encryption key**: the Dashboard generates a per-workspace Curve25519 key pair in the browser. Only the public key is uploaded as the `AUROFLOW_PUBLIC_KEY` Actions variable; the private key remains in origin-specific `localStorage` under `auroflow.session-key.v1.*`. A different browser, lost site data or a different domain cannot decrypt an already published session. Start a new session to rotate the key.
+- Storage keys are namespaced because GitHub Pages projects on the same domain share an origin. Older prototype storage keys are cleared on load.
 - Credentials never appear in URLs, logs or rendered HTML. API error messages strip query strings and never include headers.
 - Production builds set a Content-Security-Policy that forbids inline scripts and limits network access to GitHub, Hugging Face and the configured relay. `'wasm-unsafe-eval'` is allowed for libsodium.
 
@@ -56,7 +58,7 @@ The OAuth scopes requested by the worker (`repo workflow`) reach all of the user
 
 ## Public workspaces
 
-Public repositories are supported. `session.json` and the workflow annotations are then readable by anyone, and the reference image has a passwordless account. The panel warns on the settings page, asks for confirmation before creating a public workspace or changing visibility, shows a persistent warning on the dashboard and confirms before starting a public instance.
+Public repositories are supported. Their control branch and workflow logs may be readable by anyone. Current `session.json` files contain encrypted RDP endpoints, but a previously exposed address, log disclosure or network discovery can still reveal a tunnel. The reference image uses the `Cloud` account with no password. Set a strong Windows password before exposing RDP; ngrok's agent token does not authenticate RDP clients. The panel warns on the settings page, asks for confirmation before creating a public workspace or changing visibility, shows a persistent warning on the dashboard and confirms before starting a public instance.
 
 ## Development
 
@@ -65,7 +67,7 @@ Requirements: Node.js 22.
 ```bash
 npm install
 cp .env.example .env    # set PUBLIC_AUTH_URL to your deployed worker
-npm run dev             # http://localhost:4321/auroflow-panel/
+npm run dev             # http://localhost:4321/auroflow/
 ```
 
 | Command | Action |
@@ -86,9 +88,9 @@ src/
   layouts/      BaseLayout (head, CSP, fonts, toasts, dialog)
   lib/          config, paths, storage, errors, github, huggingface, relay,
                 session, vm-state (pure), vm-controller, poller, workspace, ui, format
-  pages/        index, panel, settings, 404
+  pages/        index, dashboard, panel (legacy redirect), settings, 404
   scripts/      Client entry points per page
-  styles/       tokens.css, global.css, app.css, home.css, panel.css, settings.css
+  styles/       tokens.css, global.css, app.css, home.css, home-v2.css, panel.css, settings.css
 tests/          Vitest unit tests
 worker/         Cloudflare Worker for Device Flow
 ```
@@ -103,11 +105,19 @@ Integration constants (workflow file name, step names, branch, issue title, secr
 4. Under Settings, Pages, select GitHub Actions as the source.
 5. Push to `main`. `.github/workflows/pages.yml` runs the type check, unit tests and build, then deploys.
 
-`astro.config.mjs` sets `site` and `base`. Every internal link goes through `href()` in `src/lib/paths.ts`, so changing `base` there is enough when deploying under another repository name. Pages are emitted as `panel/index.html` and `settings/index.html` with trailing-slash links, which GitHub Pages serves without redirects.
+`astro.config.mjs` sets `site` and `base`. Every internal link goes through `href()` in `src/lib/paths.ts`, so changing `base` there is enough when deploying under another repository name. Pages are emitted as `dashboard/index.html` and `settings/index.html` with trailing-slash links. The legacy `panel/index.html` performs a client-side HTML redirect, not an HTTP 301.
 
 ## Engine compatibility
 
-The panel works with the current engine without modification. Compatibility notes and recommended engine changes are in [docs/backend-changes.md](docs/backend-changes.md).
+The Dashboard requires an Engine that publishes schema-v3 encrypted sessions using `AUROFLOW_PUBLIC_KEY`; older plaintext session metadata is not supported by this flow. The Dashboard sets this variable before dispatching a session. For engine internals, see [AuroFlow Engine](https://github.com/fox3000foxy/auroflow-engine).
+
+## Golden Images and storage optimization
+
+The reference Windows 10 IoT Enterprise LTSC 2021 image is a read-only, compressed QCOW2 base. Compatible custom QCOW2 images can be loaded from Hugging Face by configuring the image URL and SHA-256 in Settings. Custom disks must support the engine's x86-64, UEFI, VirtIO and RDP configuration.
+
+A persistent session writes to an incremental QCOW2 overlay. On a clean shutdown, the overlay, UEFI variables and emulated TPM state are verified and committed to a private Hugging Face dataset. Scheduled compaction can merge multiple layers without modifying the Golden Image, verify the resulting disk with `qemu-img`, publish the consolidated layer and re-download it for validation. Optional history rewriting and orphaned LFS cleanup permanently remove older revisions and unreferenced blobs. These destructive operations require extra care and a separate backup.
+
+A test consolidated three layers from approximately 1090.3 MiB to 998.1 MiB (8.5% smaller). The consolidated state was restored, booted in Windows and saved again successfully. Automatic scheduled compaction and LFS cleanup should be monitored separately; a successful manual test does not prove the entire scheduled lifecycle.
 
 ## Limitations
 
