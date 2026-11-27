@@ -1,6 +1,10 @@
-# Windows Golden Panel
+# AuroFlow Panel
 
-Static web application for [Windows Golden](https://github.com/fox3000foxy/windows10-golden): on-demand Windows 10 IoT Enterprise LTSC 2021 virtual machines running under QEMU/KVM on GitHub Actions, reachable over RDP through ngrok, with persistent storage as compressed QCOW2 layers in a private Hugging Face dataset.
+> Ephemeral compute. Persistent state.
+>
+> Workflow-powered cloud virtualization.
+
+Static web application for [AuroFlow](https://github.com/fox3000foxy/windows10-golden): on-demand Windows 10 IoT Enterprise LTSC 2021 virtual machines running under QEMU/KVM on GitHub Actions, reachable over RDP through ngrok, with persistent storage as compressed QCOW2 layers in a private Hugging Face dataset.
 
 The panel has no backend of its own. It talks to the GitHub REST API and the Hugging Face API directly from the browser. A small Cloudflare Worker (`worker/`) relays GitHub Device Flow, because GitHub's OAuth endpoints do not accept browser CORS requests.
 

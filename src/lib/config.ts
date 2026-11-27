@@ -46,7 +46,7 @@ export const SPEC = {
 } as const;
 
 /** Default repository name suggested for a new workspace. */
-export const DEFAULT_WORKSPACE_REPO = 'windows-golden-instance';
+export const DEFAULT_WORKSPACE_REPO = 'auroflow-instance';
 
 export const REPO_NAME_RE = /^[A-Za-z0-9_.-]{1,100}$/;
 export const DATASET_RE = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;

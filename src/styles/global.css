@@ -891,3 +891,10 @@ svg {
     animation: none;
   }
 }
+
+/* AuroFlow brand proportions */
+.brand .brand__mark {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+}

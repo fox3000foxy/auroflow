@@ -194,7 +194,7 @@ export class GitHubClient {
         name,
         private: isPrivate,
         include_all_branches: false,
-        description: 'Windows Golden workspace',
+        description: 'AuroFlow workspace',
       },
     });
   }
@@ -338,7 +338,7 @@ export class GitHubClient {
       method: 'POST',
       body: {
         title: shutdownIssueTitle(runId),
-        body: `Graceful shutdown requested from Windows Golden Panel for workflow run ${runId}.\n\nThe engine polls this issue, sends an ACPI power-down to Windows and saves the persistent layers before the run completes.`,
+        body: `Graceful shutdown requested from AuroFlow Panel for workflow run ${runId}.\n\nThe engine polls this issue, sends an ACPI power-down to Windows and saves the persistent layers before the run completes.`,
       },
     });
   }

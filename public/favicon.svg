@@ -1,5 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="70 96 955 955">
-  <path d="M270.2 389.0H824.8L927.5 547H167.5Z M492.0 398.0H603.0A25.0 25.0 0 0 1 628.0 423.0V504.0A25.0 25.0 0 0 1 603.0 529.0H492.0A25.0 25.0 0 0 1 467.0 504.0V423.0A25.0 25.0 0 0 1 492.0 398.0Z" fill="#DAC394" fill-rule="evenodd" stroke="#DAC394" stroke-width="10" stroke-linejoin="round"/>
-  <path d="M165.1 552.0H929.9L946.7 605.0H148.3Z M141.0 628.0H954.0L970.8 681.0H124.2Z M116.9 704.0H978.1L995.0 757.0H100.0Z" fill="#C0A56B" stroke="#C0A56B" stroke-width="10" stroke-linejoin="round"/>
-  <path d="M492 418H603A4 4 0 0 1 607 422V437H488V422A4 4 0 0 1 492 418Z M488 451H607V505A4 4 0 0 1 603 509H492A4 4 0 0 1 488 505Z" fill="#CEB47A"/>
+<svg xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 80 80"
+  role="img" aria-label="AuroFlow">
+  <path d="M40 3 L76 23 L40 43 L4 23 Z"
+    fill="#E3CFA0"/>
+  <path d="M4 32 L40 52 L76 32 L76 41 L40 61 L4 41 Z"
+    fill="#CDB57E"/>
+  <path d="M4 49 L40 69 L76 49 L76 56 L40 76 L4 56 Z"
+    fill="#CDB57E"/>
 </svg>
