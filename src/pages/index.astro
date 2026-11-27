@@ -75,7 +75,7 @@ const steps = [
   },
   {
     title: 'Secure Windows',
-    body: 'The reference image has a passwordless account. Set a strong password in your first session before relying on the endpoint, especially with a public workspace.',
+    body: 'The reference Windows image uses the username Cloud with no password by default. Set a strong password before relying on remote access.',
   },
   {
     title: 'Start and connect',
@@ -391,7 +391,7 @@ const steps = [
         <div class="split split--even">
           <ul class="facts">
             <li><strong>Remote Desktop is not authenticated by ngrok.</strong> The ngrok token authorises the tunnel agent, not RDP clients. Anyone with the endpoint can reach the Windows login screen.</li>
-            <li><strong>The reference account has no password.</strong> Set a strong password through a trusted connection before relying on any endpoint.</li>
+            <li><strong>Default Windows credentials:</strong> Username <code>Cloud</code>, no password. Set a strong password before relying on any RDP endpoint.</li>
             <li><strong>Encrypted endpoint publishing.</strong> On compatible Engines, the RDP endpoint is encrypted before it reaches the public control branch. The private decryption key remains in the launching browser. This does not authenticate RDP clients or erase previously exposed endpoints.</li>
             <li><strong>Force stop discards the session.</strong> Cancelling the run skips the save step.</li>
           </ul>
