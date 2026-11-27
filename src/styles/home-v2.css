@@ -547,3 +547,122 @@
     padding-block: 36px;
   }
 }
+/* Mobile viewport fix - v2.1 */
+@media (max-width: 640px) {
+  .home {
+    width: 100%;
+    min-width: 0;
+  }
+
+  /* Two-row navigation with no horizontal overflow */
+  .home .topbar {
+    height: auto;
+  }
+
+  .home .topbar__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "brand identity"
+      "nav nav";
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    gap: 0 8px;
+    padding: 8px 16px 0;
+  }
+
+  .home .topbar .brand {
+    grid-area: brand;
+    min-width: 0;
+  }
+
+  .home .topbar .identity {
+    grid-area: identity;
+    min-width: 0;
+    margin-left: 0;
+  }
+
+  .home .topbar .identity .btn {
+    height: 34px;
+    padding-inline: 10px;
+    font-size: 12px;
+  }
+
+  .home .topbar .nav {
+    grid-area: nav;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+    min-width: 0;
+    height: 42px;
+    gap: 0;
+  }
+
+  .home .topbar .nav a {
+    min-width: 0;
+    justify-content: center;
+    padding-inline: 2px;
+    font-size: 12px;
+  }
+
+  /* Hero elements must remain inside the viewport */
+  .home .hero__inner {
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+    padding: 28px 16px;
+  }
+
+  .home .hero__copy,
+  .home .hero__title,
+  .home .hero__foot {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .home .hero__kicker {
+    font-size: 10px;
+    letter-spacing: .035em;
+    overflow-wrap: anywhere;
+  }
+
+  .home .hero__title {
+    font-size: clamp(1.85rem, 8vw, 2.3rem);
+    line-height: 1.1;
+    overflow-wrap: anywhere;
+    text-wrap: wrap;
+  }
+
+  .home .af-visual {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    padding: 12px;
+  }
+
+  .home .af-visual svg {
+    display: block;
+    width: min(80%, 250px);
+    max-width: 100%;
+    height: auto;
+    margin: 8px auto 12px;
+  }
+
+  .home .hero__foot {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+    margin-top: 0;
+  }
+
+  .home .hero__lede {
+    font-size: 1rem;
+    overflow-wrap: anywhere;
+  }
+
+  .home .band__inner {
+    min-width: 0;
+    padding-inline: 16px;
+  }
+}
