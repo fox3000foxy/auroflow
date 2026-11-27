@@ -77,6 +77,9 @@ function renderStatus() {
   const datasetInput = input('[data-dataset-input]');
   if (status && !datasetInput.dataset.touched) datasetInput.value = status.variables.hfRepo ?? '';
 
+  input('[data-golden-url]').value = status?.variables.goldenUrl ?? '';
+  input('[data-golden-hash]').value = status?.variables.goldenHash ?? '';
+
   // Network restriction support, read from the workspace's own workflow.
   const notice = $('[data-network-state]');
   const text = $('[data-network-text]');
@@ -181,7 +184,7 @@ function validateForm(): boolean {
     setFieldError(name, message);
     ok = false;
   };
-  for (const name of ['repo', 'ngrok', 'hf', 'dataset', 'cidr']) setFieldError(name, null);
+  for (const name of ['repo', 'ngrok', 'hf', 'dataset', 'cidr', 'goldenUrl', 'goldenHash']) setFieldError(name, null);
 
   if (!REPO_NAME_RE.test(repoName())) fail('repo', 'Use letters, numbers, dots, hyphens or underscores.');
   const ngrok = input('[data-ngrok-input]').value.trim();
@@ -192,6 +195,20 @@ function validateForm(): boolean {
   if (hf && !/^hf_\S{20,}$/.test(hf)) fail('hf', 'Hugging Face tokens start with hf_.');
   const dataset = input('[data-dataset-input]').value.trim();
   if (dataset && !DATASET_RE.test(dataset)) fail('dataset', 'Use the form owner/name.');
+  const goldenUrl = input('[data-golden-url]').value.trim().replace('/blob/', '/resolve/');
+  const goldenHash = input('[data-golden-hash]').value.trim().toLowerCase();
+
+  if (goldenUrl) {
+    if (!/^https:\/\/huggingface\.co\/datasets\/[^/]+\/[^/]+\/resolve\/[^/]+\/[^?#]+\.qcow2$/i.test(goldenUrl))
+      fail('goldenUrl', 'Enter a valid Hugging Face dataset QCOW2 URL.');
+    if (!/^[a-f0-9]{64}$/.test(goldenHash))
+      fail('goldenHash', 'Enter a valid SHA-256 checksum.');
+    if (status?.repo && !status.customGolden)
+      fail('goldenUrl', 'Update this workspace to the latest AuroFlow Engine.');
+    if (!dataset)
+      fail('dataset', 'Specify a separate persistence dataset for the custom image.');
+  }
+
   const network = status?.network;
   if (network === 'validated' || network === 'enforced') {
     const cidr = input('[data-cidr-input]').value.trim();
@@ -251,6 +268,10 @@ async function onSave(event: SubmitEvent) {
         hfToken,
         dataset: input('[data-dataset-input]').value.trim(),
         cidr: input('[data-cidr-input]').value.trim(),
+        goldenUrl: input('[data-golden-url]').value.trim().replace('/blob/', '/resolve/'),
+        goldenHash: input('[data-golden-url]').value.trim()
+          ? input('[data-golden-hash]').value.trim().toLowerCase()
+          : '',
         applyVisibility,
       },
       (message) => setSaveStatus(`${message}.`),

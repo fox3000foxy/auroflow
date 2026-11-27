@@ -23,7 +23,13 @@ export interface WorkspaceStatus {
   network: NetworkSupport;
   actionsEnabled: boolean | null;
   secrets: { ngrok: string | null; hf: string | null };
-  variables: { hfRepo: string | null; cidr: string | null };
+  customGolden?: boolean;
+  variables: {
+    hfRepo: string | null;
+    cidr: string | null;
+    goldenUrl?: string | null;
+    goldenHash?: string | null;
+  };
 }
 
 export function networkSupport(source: string | null): NetworkSupport {
@@ -45,13 +51,15 @@ export async function inspectWorkspace(gh: GitHubClient, owner: string, name: st
       variables: { hfRepo: null, cidr: null },
     };
   }
-  const [source, actions, ngrok, hf, hfRepo, cidr] = await Promise.all([
+  const [source, actions, ngrok, hf, hfRepo, cidr, goldenUrl, goldenHash] = await Promise.all([
     gh.workflowSource(owner, name),
     gh.actionsPermissions(owner, name).catch(() => null),
     gh.secretInfo(owner, name, SECRET_NGROK),
     gh.secretInfo(owner, name, SECRET_HF),
     gh.variable(owner, name, VAR_HF_REPO),
     gh.variable(owner, name, VAR_RDP_CIDR),
+    gh.variable(owner, name, 'GOLDEN_URL'),
+    gh.variable(owner, name, 'GOLDEN_SHA256'),
   ]);
   return {
     repo,
@@ -59,7 +67,8 @@ export async function inspectWorkspace(gh: GitHubClient, owner: string, name: st
     network: networkSupport(source),
     actionsEnabled: actions ? actions.enabled : null,
     secrets: { ngrok: ngrok?.updated_at ?? null, hf: hf?.updated_at ?? null },
-    variables: { hfRepo, cidr },
+    customGolden: !!source && source.includes('GOLDEN_URL'),
+    variables: { hfRepo, cidr, goldenUrl, goldenHash },
   };
 }
 
@@ -141,6 +150,8 @@ export interface SaveInput {
   hfToken: string;
   dataset: string;
   cidr: string;
+  goldenUrl?: string;
+  goldenHash?: string;
   /** Change visibility of an existing repository to match `private`. */
   applyVisibility: boolean;
 }
@@ -198,6 +209,17 @@ export async function saveWorkspace(gh: GitHubClient, input: SaveInput, progress
   if (input.cidr) {
     progress(`Setting ${VAR_RDP_CIDR}`);
     await gh.setVariable(owner, name, VAR_RDP_CIDR, input.cidr.trim());
+  }
+  if (input.goldenUrl !== undefined) {
+    const source = await gh.workflowSource(owner, name);
+    if (input.goldenUrl && !source?.includes('GOLDEN_URL')) {
+      throw new Error('Update the workspace engine before using custom images.');
+    }
+    if (source?.includes('GOLDEN_URL')) {
+      progress('Saving Golden Image configuration');
+      await gh.setVariable(owner, name, 'GOLDEN_SHA256', input.goldenHash || '');
+      await gh.setVariable(owner, name, 'GOLDEN_URL', input.goldenUrl);
+    }
   }
   progress('Configuration saved');
   return repo;

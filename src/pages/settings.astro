@@ -152,6 +152,47 @@ const sections = [
               </div>
             </section>
 
+
+            <!-- Golden Image -->
+            <section class="section" id="golden" aria-labelledby="golden-title">
+              <div class="section__intro">
+                <h2 class="section__title" id="golden-title">Golden Image</h2>
+                <p class="section__text">
+                  Use the AuroFlow reference image or your own QCOW2 disk hosted on Hugging Face.
+                </p>
+              </div>
+              <div class="section__body">
+                <label class="field">
+                  <span class="field__label">Hugging Face image URL</span>
+                  <input class="input input--mono"
+                    name="goldenUrl" data-golden-url
+                    placeholder="https://huggingface.co/datasets/owner/repo/resolve/main/disk.qcow2"
+                    autocomplete="off" spellcheck="false" />
+                  <span class="field__hint">
+                    Leave empty to use the AuroFlow reference image.
+                  </span>
+                  <span class="field__error" data-error-for="goldenUrl" hidden></span>
+                </label>
+
+                <label class="field">
+                  <span class="field__label">SHA-256 checksum</span>
+                  <input class="input input--mono"
+                    name="goldenHash" data-golden-hash
+                    placeholder="64 hexadecimal characters"
+                    autocomplete="off" spellcheck="false" />
+                  <span class="field__hint">
+                    Required for custom images.
+                  </span>
+                  <span class="field__error" data-error-for="goldenHash" hidden></span>
+                </label>
+
+                <div class="notice notice--warn">
+                  <Icon name="info" />
+                  <p>Stop the VM and use a separate persistence dataset when changing the base image. Existing layers cannot be reused with a different image.</p>
+                </div>
+              </div>
+            </section>
+
             <!-- Network -->
             <section hidden class="section" id="network" aria-labelledby="network-title">
               <div class="section__intro">
