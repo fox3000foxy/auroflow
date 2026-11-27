@@ -1,4 +1,4 @@
-name = "windows-golden-auth"
+name = "auroflow-auth"
 main = "index.js"
 compatibility_date = "2025-01-01"
 
