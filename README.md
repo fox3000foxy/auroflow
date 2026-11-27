@@ -4,7 +4,7 @@
 >
 > Workflow-powered cloud virtualization.
 
-Static web application for [AuroFlow](https://github.com/fox3000foxy/windows10-golden): on-demand Windows 10 IoT Enterprise LTSC 2021 virtual machines running under QEMU/KVM on GitHub Actions, reachable over RDP through ngrok, with persistent storage as compressed QCOW2 layers in a private Hugging Face dataset.
+Static web application for [AuroFlow](https://github.com/fox3000foxy/auroflow-engine): on-demand Windows 10 IoT Enterprise LTSC 2021 virtual machines running under QEMU/KVM on GitHub Actions, reachable over RDP through ngrok, with persistent storage as compressed QCOW2 layers in a private Hugging Face dataset.
 
 The panel has no backend of its own. It talks to the GitHub REST API and the Hugging Face API directly from the browser. A small Cloudflare Worker (`worker/`) relays GitHub Device Flow, because GitHub's OAuth endpoints do not accept browser CORS requests.
 
@@ -65,7 +65,7 @@ Requirements: Node.js 22.
 ```bash
 npm install
 cp .env.example .env    # set PUBLIC_AUTH_URL to your deployed worker
-npm run dev             # http://localhost:4321/windows-golden-panel/
+npm run dev             # http://localhost:4321/auroflow-panel/
 ```
 
 | Command | Action |

@@ -280,7 +280,7 @@ async function loadStorage(gh: GitHubClient, owner: string, repo: string) {
     setDd('[data-golden-tag]', tag ?? 'Not pinned');
     if (tag) {
       const release = await gh.releaseByTag(ENGINE_OWNER, ENGINE_REPO, tag);
-      const parts = release?.assets.filter((a) => /^windows10-golden\.qcow2\.part-\d{2}$/.test(a.name)) ?? [];
+      const parts = release?.assets.filter((a) => /^auroflow-engine\.qcow2\.part-\d{2}$/.test(a.name)) ?? [];
       setDd('[data-golden-size]', parts.length ? `${bytes(parts.reduce((sum, a) => sum + a.size, 0))} in ${parts.length} parts` : 'Release not found');
     } else setDd('[data-golden-size]', 'Unknown');
   } catch (error) {

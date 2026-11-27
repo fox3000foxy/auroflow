@@ -20,7 +20,7 @@ describe('summariseTree', () => {
   });
 
   it('builds the engine default dataset name', () => {
-    expect(defaultDatasetName('alice', 'windows-golden-instance')).toBe('alice/windows-golden-instance-layers');
+    expect(defaultDatasetName('alice', 'auroflow-instance')).toBe('alice/auroflow-instance-layers');
   });
 });
 

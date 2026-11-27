@@ -1,13 +1,13 @@
 /**
  * Integration constants. Every value here mirrors something that exists in the
- * VM engine repository (fox3000foxy/windows10-golden). If the engine changes,
+ * VM engine repository (fox3000foxy/auroflow-engine). If the engine changes,
  * this is the single place to update.
  */
 
 export const ENGINE_OWNER = 'fox3000foxy';
-export const ENGINE_REPO = 'windows10-golden';
+export const ENGINE_REPO = 'auroflow-engine';
 export const ENGINE_URL = `https://github.com/${ENGINE_OWNER}/${ENGINE_REPO}`;
-export const PANEL_URL = 'https://github.com/fox3000foxy/windows-golden-panel';
+export const PANEL_URL = 'https://github.com/fox3000foxy/auroflow-panel';
 
 /** .github/workflows/windows-persistent.yml in the engine. */
 export const WORKFLOW_FILE = 'windows-persistent.yml';

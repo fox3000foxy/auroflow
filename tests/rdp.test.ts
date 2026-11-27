@@ -19,7 +19,7 @@ describe('rdp helpers', () => {
   });
 
   it('derives a safe file name', () => {
-    expect(rdpFileName('windows-golden-instance')).toBe('windows-golden-instance.rdp');
+    expect(rdpFileName('auroflow-instance')).toBe('auroflow-instance.rdp');
     expect(rdpFileName('../x y')).toBe('x-y.rdp');
   });
 

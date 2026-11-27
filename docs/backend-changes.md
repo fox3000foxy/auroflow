@@ -1,6 +1,6 @@
 # Backend compatibility notes
 
-No change to the VM engine (`fox3000foxy/windows10-golden`) or to the authentication worker is required for this version of the panel. The items below are inconsistencies found while integrating, with the panel's workaround and a recommended engine change. None of them have been applied.
+No change to the VM engine (`fox3000foxy/auroflow-engine`) or to the authentication worker is required for this version of the panel. The items below are inconsistencies found while integrating, with the panel's workaround and a recommended engine change. None of them have been applied.
 
 ## 1. `RDP_ALLOWED_CIDR` is required but not enforced
 
@@ -39,7 +39,7 @@ This matches workspaces created by the panel, which are always under the signed-
 
 ## 5. Template generation
 
-Workspace creation calls `POST /repos/fox3000foxy/windows10-golden/generate`, which only works if the engine repository is marked as a template (Settings, General, Template repository). This could not be verified from the build environment. If it is not, the panel shows the GitHub error and the workspace can be created with "Use this template" or a fork, then selected by name in Settings.
+Workspace creation calls `POST /repos/fox3000foxy/auroflow-engine/generate`, which only works if the engine repository is marked as a template (Settings, General, Template repository). This could not be verified from the build environment. If it is not, the panel shows the GitHub error and the workspace can be created with "Use this template" or a fork, then selected by name in Settings.
 
 ## 6. Authentication worker (changed)
 
