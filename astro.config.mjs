@@ -5,7 +5,7 @@ import { defineConfig } from 'astro/config';
 export default defineConfig({
   // Custom domain configured for the account's GitHub Pages.
   site: 'https://fox3000foxy.com',
-  base: '/auroflow-panel',
+  base: '/auroflow',
   output: 'static',
   trailingSlash: 'always',
   build: {

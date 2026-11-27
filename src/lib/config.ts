@@ -7,7 +7,7 @@
 export const ENGINE_OWNER = 'fox3000foxy';
 export const ENGINE_REPO = 'auroflow-engine';
 export const ENGINE_URL = `https://github.com/${ENGINE_OWNER}/${ENGINE_REPO}`;
-export const PANEL_URL = 'https://github.com/fox3000foxy/auroflow-panel';
+export const PANEL_URL = 'https://github.com/fox3000foxy/auroflow';
 
 /** .github/workflows/windows-persistent.yml in the engine. */
 export const WORKFLOW_FILE = 'windows-persistent.yml';
