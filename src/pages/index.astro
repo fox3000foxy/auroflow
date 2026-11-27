@@ -37,7 +37,7 @@ const lifecycle = [
   },
   {
     title: 'Restore the Golden Image',
-    body: 'The image is restored from the Actions cache, or downloaded in parallel parts from the engine release, then verified against its SHA-256 and with qemu-img check.',
+    body: 'The reference image is restored from cache or downloaded from the engine release. Custom images are downloaded from Hugging Face. Both are verified against their SHA-256 and with qemu-img check.',
   },
   {
     title: 'Rebuild the disk chain',
@@ -87,7 +87,7 @@ const steps = [
 
 <BaseLayout
   title="AuroFlow | Ephemeral compute. Persistent state."
-  description="On-demand Windows 10 IoT Enterprise LTSC 2021 virtual machines on GitHub Actions, reachable over RDP and persisted as QCOW2 layers on Hugging Face."
+  description="On-demand virtual machines powered by GitHub Actions. Import your own QCOW2 disk, connect remotely and preserve your environment with persistent storage on Hugging Face."
   page="home"
   bodyClass="home"
 >
@@ -122,7 +122,7 @@ const steps = [
       <div class="band__inner band__inner--split">
         <header class="band__head">
           <h2 id="what">What runs</h2>
-          <p>A debloated Windows 10 IoT Enterprise LTSC 2021 installation, prepared once as the Golden Image and published as a release of the engine repository.</p>
+          <p>The default Golden Image is a debloated Windows 10 IoT Enterprise LTSC 2021 installation. Compatible custom QCOW2 images can also be imported from Hugging Face.</p>
         </header>
         <div class="split">
           <div class="prose">
@@ -144,6 +144,79 @@ const steps = [
               </>
             ))}
           </dl>
+        </div>
+      </div>
+    </section>
+
+
+    <section class="band" aria-labelledby="custom-golden">
+      <div class="band__inner band__inner--split">
+        <header class="band__head">
+          <h2 id="custom-golden">Bring your own virtual machine</h2>
+          <p>Move your existing QEMU installation to the cloud without starting from scratch.</p>
+        </header>
+
+        <div>
+          <div class="prose">
+            <p>
+              AuroFlow is not limited to its reference Windows image.
+              Import your own compatible QCOW2 disk from Hugging Face
+              and use it as the Golden Image for your cloud instance.
+            </p>
+            <p>
+              Reuse your installed applications, files and system
+              configuration instead of rebuilding your environment.
+              Your original disk remains read-only, while changes
+              are saved as persistent incremental layers.
+            </p>
+          </div>
+
+          <ol class="steps">
+            <li class="steps__item">
+              <span class="steps__index" aria-hidden="true">1</span>
+              <h3>Export your local disk</h3>
+              <p>Shut down your local VM and prepare a standalone QCOW2 image without external backing files.</p>
+            </li>
+
+            <li class="steps__item">
+              <span class="steps__index" aria-hidden="true">2</span>
+              <h3>Upload to Hugging Face</h3>
+              <p>Store your disk in a dataset. Private images are supported through your Hugging Face token.</p>
+            </li>
+
+            <li class="steps__item">
+              <span class="steps__index" aria-hidden="true">3</span>
+              <h3>Configure AuroFlow</h3>
+              <p>Paste the image URL in Settings, fetch its SHA-256 checksum and select a dedicated persistence dataset.</p>
+            </li>
+
+            <li class="steps__item">
+              <span class="steps__index" aria-hidden="true">4</span>
+              <h3>Start your cloud instance</h3>
+              <p>Boot your compatible system on a GitHub-hosted runner and connect through Remote Desktop.</p>
+            </li>
+          </ol>
+
+          <div class="prose">
+            <p class="prose__note">
+              Custom images must be compatible with the engine's x86-64,
+              UEFI, VirtIO and RDP configuration. Importing a disk does
+              not transfer the original VM's hardware configuration,
+              firmware variables or TPM state. Systems using BitLocker
+              or TPM-bound encryption may require additional preparation.
+              Custom image downloads are not cached by GitHub Actions.
+            </p>
+          </div>
+
+          <div class="cta">
+            <div>
+              <h3>Your disk. Your environment.</h3>
+              <p>Configure your own Golden Image from Settings.</p>
+            </div>
+            <div class="cta__actions">
+              <a class="btn btn--primary btn--lg" href={href('/settings/')}>Configure custom image</a>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -182,7 +255,7 @@ const steps = [
             <div class="stack__layer"><span>Layer 3</span><span>layers/&lt;id&gt;/disk.qcow2</span></div>
             <div class="stack__layer"><span>Layer 2</span><span>layers/&lt;id&gt;/disk.qcow2</span></div>
             <div class="stack__layer"><span>Layer 1</span><span>layers/&lt;id&gt;/disk.qcow2</span></div>
-            <div class="stack__layer stack__layer--base"><span>Golden Image</span><span>pinned in golden.env</span></div>
+            <div class="stack__layer stack__layer--base"><span>Golden Image</span><span>verified by SHA-256</span></div>
           </div>
           <div class="prose">
             <p>
@@ -203,7 +276,7 @@ const steps = [
       <div class="band__inner band__inner--split">
         <header class="band__head">
           <h2 id="start">Getting started</h2>
-          <p>Everything is configured from the panel. The first boot also downloads and caches the Golden Image.</p>
+          <p>Everything is configured from the panel. Choose the reference Golden Image or import your own compatible QCOW2 disk.</p>
         </header>
         <div>
           <ol class="steps">
