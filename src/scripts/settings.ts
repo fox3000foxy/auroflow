@@ -452,9 +452,15 @@ async function boot() {
   const discoverySession = session;
   const discovery = document.querySelector<HTMLElement>('[data-discovery]')!;
   const results = discovery.querySelector<HTMLElement>('[data-discovery-results]')!;
-  discovery.hidden = false;
   discovery.querySelector<HTMLButtonElement>('[data-discover]')!.onclick = () => void discoverInto(discoverySession, results);
   const workspace = currentWorkspace(session.user.login);
+
+  const hasWorkspace = !!workspace &&
+    workspace.owner.toLowerCase() === session.user.login.toLowerCase();
+  discovery.hidden = false;
+  discovery.querySelector<HTMLButtonElement>('[data-discover]')!.textContent =
+    hasWorkspace ? 'Change workspace' : 'Discover workspaces';
+
   if (!workspace || workspace.owner.toLowerCase() !== session.user.login.toLowerCase()) void discoverInto(discoverySession, results);
   input('[data-repo-input]').value = workspace?.repo ?? takeLegacyRepo() ?? DEFAULT_WORKSPACE_REPO;
   await inspect();
