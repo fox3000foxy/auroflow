@@ -112,7 +112,7 @@ const stages = ['Runner', 'Dataset', 'Golden Image', 'Layers', 'Boot', 'Tunnel',
       <div class="notice notice--warn" data-public-warning hidden>
         <Icon name="globe" />
         <div>
-          <p><strong>This workspace is public.</strong> Anyone can read the RDP endpoint from the <code>golden-control</code> branch and the workflow annotations.</p>
+          <p><strong>This workspace is public.</strong> Encrypted sessions hide the RDP address in <code>session.json</code>. Older sessions, logs and other leaks may still expose it. Encryption does not prevent connections to a discovered endpoint.</p>
           <p>The reference image has a passwordless account and ngrok does not authenticate RDP clients. Set a strong Windows password before connecting, or make the workspace private in <a href={href('/settings/#workspace')}>Settings</a>.</p>
         </div>
       </div>

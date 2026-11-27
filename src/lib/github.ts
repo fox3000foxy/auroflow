@@ -372,10 +372,12 @@ export class GitHubClient {
           runId,
           commit
         );
-      } catch {
+      } catch (error) {
         return {
           kind: 'invalid',
-          reason: 'Encrypted endpoint cannot be decrypted with this browser key.',
+          reason: error instanceof Error && error.message.startsWith('This browser does not have the private key')
+            ? error.message
+            : 'Unable to decrypt this session. The browser key may have changed or the encrypted data may be invalid. Do not start another session until the current one has ended.',
           commit
         };
       }

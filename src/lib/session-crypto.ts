@@ -56,7 +56,7 @@ export async function decryptEndpoint(
   const stored = localStorage.getItem(storageKey(owner, repo));
 
   if (!stored) {
-    throw new Error('Session private key unavailable.');
+    throw new Error('This browser does not have the private key for this encrypted session. End the current session and start a new one from this browser.');
   }
 
   const privateKey = sodium.from_base64(
