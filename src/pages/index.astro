@@ -4,7 +4,10 @@ import ArchitectureDiagram from '../components/ArchitectureDiagram.astro';
 import Icon from '../components/Icon.astro';
 import { href } from '../lib/paths';
 import { ENGINE_URL, PANEL_URL, SPEC, AUTO_SHUTDOWN_MIN, WORKFLOW_TIMEOUT_MIN } from '../lib/config';
+import HomeVisual from '../components/HomeVisual.astro';
+import FeatureGrid from '../components/FeatureGrid.astro';
 import '../styles/home.css';
+import '../styles/home-v2.css';
 
 // Reference values published in the engine README (System specifications,
 // Disk optimization, Observed benchmarks). Kept verbatim; not measured here.
@@ -94,8 +97,11 @@ const steps = [
   <main id="main" tabindex="-1">
     <section class="hero">
       <div class="hero__inner">
-        <p class="hero__kicker">Workflow-powered cloud virtualization</p>
-        <h1 class="hero__title">Ephemeral compute. Persistent state.</h1>
+        <div class="hero__copy">
+          <p class="hero__kicker">Workflow-powered cloud virtualization</p>
+          <h1 class="hero__title">Ephemeral compute. <span>Persistent state.</span></h1>
+        </div>
+        <HomeVisual />
         <div class="hero__foot">
           <p class="hero__lede">
             On-demand virtual machines powered by GitHub Actions. Automated deployment, remote access and persistent storage across ephemeral runners.
@@ -107,6 +113,8 @@ const steps = [
         </div>
       </div>
     </section>
+
+    <FeatureGrid />
 
     <section class="band band--diagram" aria-labelledby="architecture">
       <div class="band__inner">

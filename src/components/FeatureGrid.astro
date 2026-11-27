@@ -1,0 +1,23 @@
+---
+const features = [
+  { id: 'custom-golden', label: '01 / IMPORT', title: 'Bring your own disk', body: 'Reuse a compatible local QCOW2 installation or start with the reference Windows image.', mark: 'QCOW2' },
+  { id: 'what', label: '02 / COMPUTE', title: 'On-demand compute', body: 'QEMU with KVM acceleration on ephemeral runners.', mark: 'KVM' },
+  { id: 'persistence', label: '03 / STORAGE', title: 'Persistent by design', body: 'Save changes as incremental disk layers on Hugging Face.', mark: 'LAYERS' },
+  { id: 'start', label: '04 / ACCESS', title: 'Remote Desktop', body: 'Connect to your running instance through RDP and ngrok.', mark: 'RDP' },
+];
+---
+<section class="af-features" aria-labelledby="af-features-title">
+  <div class="band__inner">
+    <header class="af-section-head"><p>THE PLATFORM</p><h2 id="af-features-title">Your environment. On demand.</h2></header>
+    <div class="af-grid">
+      {features.map((feature) => (
+        <a class="af-feature" href={`#${feature.id}`}>
+          <span class="af-feature__label">{feature.label}</span>
+          <span class="af-feature__mark" aria-hidden="true">{feature.mark}</span>
+          <h3>{feature.title}</h3><p>{feature.body}</p>
+          <span class="af-feature__link">Explore <span aria-hidden="true">&rarr;</span></span>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>
