@@ -17,6 +17,6 @@ export type PageKey = 'home' | 'panel' | 'settings' | 'legal' | 'privacy' | 'dis
 
 export const NAV: { key: PageKey; label: string; path: string }[] = [
   { key: 'home', label: 'Overview', path: '/' },
-  { key: 'panel', label: 'Panel', path: '/panel/' },
+  { key: 'panel', label: 'Dashboard', path: '/dashboard/' },
   { key: 'settings', label: 'Settings', path: '/settings/' },
 ];

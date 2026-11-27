@@ -32,7 +32,7 @@ const benchmarks = [
 const lifecycle = [
   {
     title: 'Start',
-    body: 'The panel dispatches windows-persistent.yml in your workspace repository. It refuses to launch a second run while one is active or queued.',
+    body: 'The dashboard dispatches windows-persistent.yml in your workspace repository. It refuses to launch a second run while one is active or queued.',
   },
   {
     title: 'Prepare the runner',
@@ -52,7 +52,7 @@ const lifecycle = [
   },
   {
     title: 'Work',
-    body: `The panel shows the endpoint for the current run only. The session ends when you shut down Windows, request a shutdown from the panel, or after ${AUTO_SHUTDOWN_MIN} minutes.`,
+    body: `The dashboard shows the endpoint for the current run only. The session ends when you shut down Windows, request a shutdown from the dashboard, or after ${AUTO_SHUTDOWN_MIN} minutes.`,
   },
   {
     title: 'Save',
@@ -79,7 +79,7 @@ const steps = [
   },
   {
     title: 'Start and connect',
-    body: 'Start the instance from the panel. AuroFlow saves a workspace public key in GitHub Actions variables and keeps the private key in this browser. Once the tunnel is ready, the panel decrypts the RDP endpoint locally.',
+    body: 'Start the instance from the dashboard. AuroFlow saves a workspace public key in GitHub Actions variables and keeps the private key in this browser. Once the tunnel is ready, the dashboard decrypts the RDP endpoint locally.',
   },
   {
     title: 'Shut down to save',
@@ -107,7 +107,7 @@ const steps = [
             On-demand virtual machines powered by GitHub Actions, with persistent storage, encrypted RDP endpoint publishing and browser-side decryption.
           </p>
           <div class="hero__actions">
-            <a class="btn btn--primary btn--lg" href={href('/panel/')}>Open the panel</a>
+            <a class="btn btn--primary btn--lg" href={href('/dashboard/')}>Open dashboard</a>
             <a class="btn btn--lg" href={ENGINE_URL} target="_blank" rel="noopener noreferrer"><Icon name="github" /> VM engine</a>
           </div>
         </div>
@@ -120,7 +120,7 @@ const steps = [
       <div class="band__inner">
         <header class="band__head">
           <h2 id="architecture">How the pieces connect</h2>
-          <p>The panel never talks to the VM directly. It drives the workspace repository through the GitHub API, and the runner reports back through the same repository.</p>
+          <p>The dashboard never talks to the VM directly. It drives the workspace repository through the GitHub API, and the runner reports back through the same repository.</p>
         </header>
         <ArchitectureDiagram />
       </div>
@@ -297,7 +297,7 @@ const steps = [
             <li class="steps__item">
               <span class="steps__index" aria-hidden="true">1</span>
               <h3>A key pair in your browser</h3>
-              <p>The panel generates a separate Curve25519 key pair for each workspace. Your private key stays in localStorage; the public key is registered as a GitHub Actions variable.</p>
+              <p>The dashboard generates a separate Curve25519 key pair for each workspace. Your private key stays in localStorage; the public key is registered as a GitHub Actions variable.</p>
             </li>
             <li class="steps__item">
               <span class="steps__index" aria-hidden="true">2</span>
@@ -307,7 +307,7 @@ const steps = [
             <li class="steps__item">
               <span class="steps__index" aria-hidden="true">3</span>
               <h3>Decrypted locally</h3>
-              <p>The panel fetches the encrypted value and decrypts it in the same browser. It then prepares the address for your RDP client.</p>
+              <p>The dashboard fetches the encrypted value and decrypts it in the same browser. It then prepares the address for your RDP client.</p>
             </li>
           </ol>
           <p class="prose__note">Endpoint encryption prevents casual disclosure through the session file, not network discovery or unauthorized RDP connections. The reference Windows account has no password; protect Windows with a strong password. Old sessions and independent logs may contain previously disclosed addresses. Losing this browser's private key prevents decrypting an existing encrypted session.</p>
@@ -319,7 +319,7 @@ const steps = [
       <div class="band__inner band__inner--split">
         <header class="band__head">
           <h2 id="lifecycle">Lifecycle of a session</h2>
-          <p>One workflow run is one session. The panel derives the VM status from the step the run is executing.</p>
+          <p>One workflow run is one session. The dashboard derives the VM status from the step the run is executing.</p>
         </header>
         <ol class="timeline">
           {lifecycle.map((item, index) => (
@@ -370,7 +370,7 @@ const steps = [
       <div class="band__inner band__inner--split">
         <header class="band__head">
           <h2 id="start">Getting started</h2>
-          <p>Everything is configured from the panel. Choose the reference Golden Image or import your own compatible QCOW2 disk.</p>
+          <p>Everything is configured from the dashboard. Choose the reference Golden Image or import your own compatible QCOW2 disk.</p>
         </header>
         <div>
           <ol class="steps">
@@ -389,7 +389,7 @@ const steps = [
             </div>
             <div class="cta__actions">
               <a class="btn btn--primary btn--lg" href={href('/settings/')}>Go to settings</a>
-              <a class="btn btn--lg" href={href('/panel/')}>Open the panel</a>
+              <a class="btn btn--lg" href={href('/dashboard/')}>Open dashboard</a>
             </div>
           </div>
         </div>
