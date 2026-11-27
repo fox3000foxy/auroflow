@@ -338,8 +338,8 @@ const steps = [
     <section class="band" aria-labelledby="persistence">
       <div class="band__inner band__inner--split">
         <header class="band__head">
-          <h2 id="persistence">Persistence in layers</h2>
-          <p>Every saved session becomes one more read-only layer, backed by the one before it.</p>
+          <h2 id="persistence">Persistent storage, automatically optimized</h2>
+          <p>Incremental QCOW2 layers keep sessions persistent, while automatic compaction reduces storage overhead and simplifies future restores.</p>
         </header>
         <div class="split split--even">
           <div class="stack" aria-label="Disk chain, newest on top">
@@ -357,6 +357,20 @@ const steps = [
             </p>
             <p>
               Each layer folder also holds the UEFI variables and TPM state, so Windows sees the same firmware and TPM on every runner. Uploads are committed against the dataset revision read at boot, and the dataset must be private or the engine refuses to read or write it.
+            </p>
+            <p>
+              <strong>Automatic storage optimization.</strong>
+              As saved layers accumulate, AuroFlow can consolidate them into
+              a single compressed QCOW2 layer without modifying the Golden Image.
+              The resulting disk is checked against the original state before
+              publication. Verified compaction can also clean up obsolete
+              Hugging Face history and orphaned LFS objects to reclaim storage.
+            </p>
+            <p>
+              <strong>Less to restore, faster preparation.</strong>
+              A shorter layer chain can reduce download and verification overhead
+              when starting a new instance. Actual startup gains depend on
+              disk changes, runner performance and network conditions.
             </p>
             <p>
               If Windows or QEMU does not stop cleanly, nothing is saved, to avoid publishing an inconsistent disk. Deleting the dataset from Settings resets the machine to the Golden Image.
