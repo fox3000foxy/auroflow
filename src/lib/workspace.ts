@@ -217,8 +217,16 @@ export async function saveWorkspace(gh: GitHubClient, input: SaveInput, progress
     }
     if (source?.includes('GOLDEN_URL')) {
       progress('Saving Golden Image configuration');
-      await gh.setVariable(owner, name, 'GOLDEN_SHA256', input.goldenHash || '');
-      await gh.setVariable(owner, name, 'GOLDEN_URL', input.goldenUrl);
+      if (input.goldenUrl) {
+        if (!input.goldenHash) {
+          throw new Error('A custom Golden Image requires a SHA-256 checksum.');
+        }
+        await gh.setVariable(owner, name, 'GOLDEN_SHA256', input.goldenHash);
+        await gh.setVariable(owner, name, 'GOLDEN_URL', input.goldenUrl);
+      } else {
+        await gh.deleteVariable(owner, name, 'GOLDEN_URL');
+        await gh.deleteVariable(owner, name, 'GOLDEN_SHA256');
+      }
     }
   }
   progress('Configuration saved');

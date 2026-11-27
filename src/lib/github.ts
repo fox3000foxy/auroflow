@@ -266,6 +266,17 @@ export class GitHubClient {
     }
   }
 
+  async deleteVariable(owner: string, repo: string, name: string): Promise<void> {
+    try {
+      await this.request(
+        `/repos/${owner}/${repo}/actions/variables/${name}`,
+        { method: 'DELETE' }
+      );
+    } catch (error) {
+      if (!isNotFound(error)) throw error;
+    }
+  }
+
   /* ---- Workflow runs ---- */
 
   async runs(owner: string, repo: string, perPage = 10): Promise<GhRun[]> {
