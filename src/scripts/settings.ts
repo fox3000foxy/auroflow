@@ -452,7 +452,24 @@ async function boot() {
   const discoverySession = session;
   const discovery = document.querySelector<HTMLElement>('[data-discovery]')!;
   const results = discovery.querySelector<HTMLElement>('[data-discovery-results]')!;
-  discovery.querySelector<HTMLButtonElement>('[data-discover]')!.onclick = () => void discoverInto(discoverySession, results);
+  const discoverButton = discovery.querySelector<HTMLButtonElement>('[data-discover]')!;
+  results.hidden = true;
+  discoverButton.setAttribute('aria-expanded', 'false');
+
+  const showDiscovery = () => {
+    results.hidden = false;
+    discoverButton.setAttribute('aria-expanded', 'true');
+    void discoverInto(discoverySession, results);
+  };
+
+  discoverButton.onclick = () => {
+    if (!results.hidden) {
+      results.hidden = true;
+      discoverButton.setAttribute('aria-expanded', 'false');
+    } else {
+      showDiscovery();
+    }
+  };
   const workspace = currentWorkspace(session.user.login);
 
   const hasWorkspace = !!workspace &&
@@ -461,7 +478,7 @@ async function boot() {
   discovery.querySelector<HTMLButtonElement>('[data-discover]')!.textContent =
     hasWorkspace ? 'Change workspace' : 'Discover workspaces';
 
-  if (!workspace || workspace.owner.toLowerCase() !== session.user.login.toLowerCase()) void discoverInto(discoverySession, results);
+  if (!hasWorkspace) showDiscovery();
   input('[data-repo-input]').value = workspace?.repo ?? takeLegacyRepo() ?? DEFAULT_WORKSPACE_REPO;
   await inspect();
 }

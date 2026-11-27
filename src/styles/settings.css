@@ -343,3 +343,28 @@
     gap: var(--s-3);
   }
 }
+
+/* Workspace discovery */
+.workspace-discovery {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+}
+
+.workspace-discovery[hidden],
+.workspace-discovery__results[hidden] {
+  display: none;
+}
+
+.workspace-discovery__results {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--c-line);
+  border-radius: 4px;
+  background: var(--c-sunken);
+  font-size: 13px;
+}

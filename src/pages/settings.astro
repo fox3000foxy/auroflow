@@ -12,6 +12,7 @@ const sections = [
   { id: 'account', label: 'Account' },
   { id: 'workspace', label: 'Workspace' },
   { id: 'credentials', label: 'Credentials' },
+  { id: 'golden', label: 'Golden Image' },
   { id: 'validation', label: 'Validation' },
   { id: 'danger', label: 'Danger zone' },
 ];
@@ -20,7 +21,6 @@ const sections = [
 <BaseLayout title="Settings" description="Configure your AuroFlow workspace." page="settings" app>
   <IconSprites names={['check', 'x', 'alert', 'minus', 'circle']} />
   <main id="main" class="app settings" tabindex="-1">
-    <section class="discovery-v2 frame" hidden data-discovery><h2>Workspaces</h2><button class="btn" type="button" data-discover>Discover workspaces</button><div data-discovery-results aria-live="polite"></div></section>
     <header class="settings__head">
       <h1 class="settings__title">Settings</h1>
       <p class="settings__lede">Account, workspace repository and the credentials the VM workflow uses. Tokens are sealed into GitHub secrets and never written to the repository.</p>
@@ -86,6 +86,13 @@ const sections = [
                   <span class="field__hint" id="repo-hint">Letters, numbers, dots, hyphens and underscores.</span>
                   <span class="field__error" data-error-for="repo" hidden></span>
                 </label>
+
+                <div class="workspace-discovery" hidden data-discovery>
+                  <button class="btn btn--sm" type="button" data-discover aria-expanded="false">
+                    Discover workspaces
+                  </button>
+                  <div class="workspace-discovery__results" data-discovery-results aria-live="polite" hidden></div>
+                </div>
 
                 <div class="field" role="radiogroup" aria-labelledby="visibility-label">
                   <span class="field__label" id="visibility-label">Visibility <span class="field__meta" data-visibility-state></span></span>
