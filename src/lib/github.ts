@@ -293,18 +293,14 @@ export class GitHubClient {
   }
 
   async dispatch(owner: string, repo: string): Promise<void> {
-    const workflow = await this.workflowSource(owner, repo);
+    const publicKey = await ensureSessionKey(owner, repo);
 
-    if (workflow?.includes('AUROFLOW_PUBLIC_KEY')) {
-      const publicKey = await ensureSessionKey(owner, repo);
-
-      await this.setVariable(
-        owner,
-        repo,
-        'AUROFLOW_PUBLIC_KEY',
-        publicKey
-      );
-    }
+    await this.setVariable(
+      owner,
+      repo,
+      'AUROFLOW_PUBLIC_KEY',
+      publicKey
+    );
 
     return this.request(`/repos/${owner}/${repo}/actions/workflows/${WORKFLOW_FILE}/dispatches`, {
       method: 'POST',
