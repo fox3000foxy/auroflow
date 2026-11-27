@@ -117,9 +117,9 @@ const stages = ['Runner', 'Dataset', 'Golden Image', 'Layers', 'Boot', 'Tunnel',
         </div>
       </div>
 
-      <section class="frame vm-resources-v2" data-resource-section hidden aria-label="Virtual machine resources">
+      <section class="frame vm-resources-v2" data-resource-section aria-label="Virtual machine resources">
         <h2>Compute resources</h2><div class="resource-grid-v2">
-        {['vCPUs','Memory','Virtual disk','Acceleration'].map(label => <div><span>{label}</span><strong data-vm-resource={label}>Pending</strong></div>)}
+        {['vCPUs','Memory','Virtual disk','Acceleration'].map(label => <div><span>{label}</span><strong data-vm-resource={label}>N/A</strong></div>)}
         </div>
         <p data-vm-details>Waiting for current session metadata.</p>
         <p class="resource-runner">Runner: <span data-runner>Assigned at start</span></p>

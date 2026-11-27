@@ -109,13 +109,12 @@ let resourcePending = false;
 let resourceLoaded = false;
 function render(state: VmSnapshotState) {
   const run = state.view?.run?.id ?? 0;
-  $('[data-resource-section]').hidden = !run;
   if (run !== resourceRun) {
     resourceRun = run;
     resourceLoaded = false;
-    $('[data-storage-disk]').textContent = 'Not detected';
-    document.querySelectorAll('[data-vm-resource]').forEach(el => el.textContent = 'Pending');
-    document.querySelector('[data-vm-details]')!.textContent = 'Waiting for current session metadata.';
+    $('[data-storage-disk]').textContent = 'N/A';
+    document.querySelectorAll('[data-vm-resource]').forEach(el => el.textContent = run ? 'Pending' : 'N/A');
+    document.querySelector('[data-vm-details]')!.textContent = run ? 'Waiting for current session metadata.' : 'Resources are allocated at startup.';
   }
   void loadSession().then(async session => {
   const ws = session && currentWorkspace(session.user.login);
