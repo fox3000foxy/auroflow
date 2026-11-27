@@ -1,3 +1,4 @@
+import { discoverInto } from '../lib/discovery';
 import { loadSession, currentWorkspace, logActivity, type AppSession } from '../lib/session';
 import { VmController, type VmSnapshotState } from '../lib/vm-controller';
 import { ApiError, describe } from '../lib/errors';
@@ -57,7 +58,13 @@ async function boot() {
     gate('signed-out');
     return;
   }
+  const discoverySession = session;
+  const discovery = document.querySelector<HTMLElement>('[data-discovery]')!;
+  const results = discovery.querySelector<HTMLElement>('[data-discovery-results]')!;
+  discovery.hidden = false;
+  discovery.querySelector<HTMLButtonElement>('[data-discover]')!.onclick = () => void discoverInto(discoverySession, results);
   const workspace = currentWorkspace(session.user.login);
+  if (!workspace || workspace.owner.toLowerCase() !== session.user.login.toLowerCase()) void discoverInto(discoverySession, results);
   if (!workspace) {
     gate('no-workspace');
     return;
@@ -102,7 +109,30 @@ async function boot() {
 
 const ACTIVE_PHASES = new Set<VmView['phase']>(['queued', 'booting', 'on', 'stopping', 'saving']);
 
+let resourceRun = 0;
+let resourcePending = false;
 function render(state: VmSnapshotState) {
+  const run = state.view?.run?.id ?? 0;
+  if (run !== resourceRun) {
+    resourceRun = run;
+    document.querySelectorAll('[data-vm-resource]').forEach(el => el.textContent = 'Unavailable');
+    document.querySelector('[data-vm-details]')!.textContent = 'Waiting for current session metadata.';
+  }
+  void loadSession().then(async session => {
+  const ws = session && currentWorkspace(session.user.login);
+  if (session && ws && run && state.view?.phase === 'on' && !resourcePending) {
+    resourcePending = true;
+    void session.gh.fileText(ws.owner,ws.repo,'session.json','golden-control').then(raw => {
+      if (!raw || resourceRun !== run) return;
+      const data = JSON.parse(raw);
+      if (String(data.run_id) !== String(run) || !data.vm) return;
+      const vm = data.vm;
+      const values = [Number.isFinite(vm.vcpus) ? String(vm.vcpus) : 'Unavailable', Number.isFinite(vm.memory_mib) ? (vm.memory_mib/1024).toFixed(2)+' GiB' : 'Unavailable', Number.isFinite(vm.disk_virtual_bytes) ? (vm.disk_virtual_bytes/1073741824).toFixed(1)+' GiB' : 'Unavailable', vm.acceleration === 'kvm' ? 'KVM' : 'Unavailable'];
+      document.querySelectorAll('[data-vm-resource]').forEach((el,i) => el.textContent = values[i]);
+      document.querySelector('[data-vm-details]')!.textContent = [vm.cpu_model,vm.machine,vm.firmware,vm.tpm,vm.image_source].filter(v=>typeof v==='string').join(' | ');
+    }).catch(()=>{}).finally(()=>{resourcePending=false;});
+  }
+  }).catch(console.error);
   const view = state.view;
   const status = $('[data-vm-status]');
   status.dataset.tone = view?.tone ?? 'unknown';

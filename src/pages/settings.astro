@@ -6,6 +6,7 @@ import DeviceLogin from '../components/DeviceLogin.astro';
 import { ENGINE_OWNER, ENGINE_REPO, ENGINE_URL, DEFAULT_WORKSPACE_REPO, SECRET_HF, SECRET_NGROK, VAR_HF_REPO, VAR_RDP_CIDR } from '../lib/config';
 import '../styles/app.css';
 import '../styles/settings.css';
+import '../styles/console-v2.css';
 
 const sections = [
   { id: 'account', label: 'Account' },
@@ -19,6 +20,7 @@ const sections = [
 <BaseLayout title="Settings" description="Configure your AuroFlow workspace." page="settings" app>
   <IconSprites names={['check', 'x', 'alert', 'minus', 'circle']} />
   <main id="main" class="app settings" tabindex="-1">
+    <section class="discovery-v2 frame" hidden data-discovery><h2>Workspaces</h2><button class="btn" type="button" data-discover>Discover workspaces</button><div data-discovery-results aria-live="polite"></div></section>
     <header class="settings__head">
       <h1 class="settings__title">Settings</h1>
       <p class="settings__lede">Account, workspace repository and the credentials the VM workflow uses. Tokens are sealed into GitHub secrets and never written to the repository.</p>
