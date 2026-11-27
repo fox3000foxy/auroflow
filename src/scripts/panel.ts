@@ -37,6 +37,8 @@ function teardown() {
   controller = null;
   unsubscribe = null;
   lastState = null;
+  resourceRun = 0;
+  resourceLoaded = false;
   if (ticker) clearInterval(ticker);
   ticker = null;
 }
@@ -104,22 +106,32 @@ const ACTIVE_PHASES = new Set<VmView['phase']>(['queued', 'booting', 'on', 'stop
 
 let resourceRun = 0;
 let resourcePending = false;
+let resourceLoaded = false;
 function render(state: VmSnapshotState) {
   const run = state.view?.run?.id ?? 0;
+  $('[data-resource-section]').hidden = !run;
   if (run !== resourceRun) {
     resourceRun = run;
-    document.querySelectorAll('[data-vm-resource]').forEach(el => el.textContent = 'Unavailable');
+    resourceLoaded = false;
+    $('[data-storage-disk]').textContent = 'Not detected';
+    document.querySelectorAll('[data-vm-resource]').forEach(el => el.textContent = 'Pending');
     document.querySelector('[data-vm-details]')!.textContent = 'Waiting for current session metadata.';
   }
   void loadSession().then(async session => {
   const ws = session && currentWorkspace(session.user.login);
-  if (session && ws && run && state.view?.phase === 'on' && !resourcePending) {
+  if (session && ws && run && state.view?.phase === 'on' && !resourcePending && !resourceLoaded) {
     resourcePending = true;
     void session.gh.fileText(ws.owner,ws.repo,'session.json','golden-control').then(raw => {
       if (!raw || resourceRun !== run) return;
       const data = JSON.parse(raw);
       if (String(data.run_id) !== String(run) || !data.vm) return;
       const vm = data.vm;
+      resourceLoaded = true;
+
+      if (Number.isFinite(vm.disk_virtual_bytes)) {
+        $('[data-storage-disk]').textContent =
+          (vm.disk_virtual_bytes / 1073741824).toFixed(1) + ' GiB, QCOW2';
+      }
       const values = [Number.isFinite(vm.vcpus) ? String(vm.vcpus) : 'Unavailable', Number.isFinite(vm.memory_mib) ? (vm.memory_mib/1024).toFixed(2)+' GiB' : 'Unavailable', Number.isFinite(vm.disk_virtual_bytes) ? (vm.disk_virtual_bytes/1073741824).toFixed(1)+' GiB' : 'Unavailable', vm.acceleration === 'kvm' ? 'KVM' : 'Unavailable'];
       document.querySelectorAll('[data-vm-resource]').forEach((el,i) => el.textContent = values[i]);
       document.querySelector('[data-vm-details]')!.textContent = [vm.cpu_model,vm.machine,vm.firmware,vm.tpm,vm.image_source].filter(v=>typeof v==='string').join(' | ');
@@ -296,27 +308,65 @@ async function loadStorage(gh: GitHubClient, owner: string, repo: string) {
   const note = $('[data-storage-note]');
   const notes: string[] = [];
 
-  // Golden Image: tag pinned in the workspace's golden.env, size from the engine release.
+  // Detect the configured image source.
   try {
-    const env = await gh.fileText(owner, repo, 'golden.env');
-    const tag = env ? /^GOLDEN_TAG=(.+)$/m.exec(env)?.[1]?.trim() : undefined;
-    setDd('[data-golden-tag]', tag ?? 'Not pinned');
-    if (tag) {
-      const release = await gh.releaseByTag(ENGINE_OWNER, ENGINE_REPO, tag);
-      const parts = release?.assets.filter((a) => /^auroflow-engine\.qcow2\.part-\d{2}$/.test(a.name)) ?? [];
-      setDd('[data-golden-size]', parts.length ? `${bytes(parts.reduce((sum, a) => sum + a.size, 0))} in ${parts.length} parts` : 'Release not found');
-    } else setDd('[data-golden-size]', 'Unknown');
+    const customUrl = await gh.variable(owner, repo, 'GOLDEN_URL');
+
+    if (customUrl) {
+      setDd('[data-instance-os]', 'Custom virtual machine');
+      setDd('[data-golden-tag]', 'Custom QCOW2', customUrl);
+      setDd('[data-golden-cache]', 'Not applicable');
+
+      try {
+        const hf = new HuggingFaceClient(credentials.huggingFace() ?? '');
+        const size = await hf.goldenSize(customUrl);
+
+        setDd('[data-golden-size]', size === null ? 'Unknown' : bytes(size));
+      } catch (error) {
+        setDd('[data-golden-size]', 'Unavailable', describe(error));
+      }
+    } else {
+      setDd('[data-instance-os]', 'Windows 10 IoT Enterprise LTSC 2021');
+
+      const env = await gh.fileText(owner, repo, 'golden.env');
+      const tag = env ? /^GOLDEN_TAG=(.+)$/m.exec(env)?.[1]?.trim() : undefined;
+
+      setDd('[data-golden-tag]', tag ?? 'Not pinned');
+
+      if (tag) {
+        const release = await gh.releaseByTag(ENGINE_OWNER, ENGINE_REPO, tag);
+        const parts = release?.assets.filter(
+          a => /^(windows10-golden|auroflow-engine)\.qcow2\.part-?\d+$/.test(a.name)
+        ) ?? [];
+
+        setDd(
+          '[data-golden-size]',
+          parts.length
+            ? `${bytes(parts.reduce((sum, a) => sum + a.size, 0))} in ${parts.length} parts`
+            : 'Image assets not detected'
+        );
+      } else {
+        setDd('[data-golden-size]', 'Unknown');
+      }
+
+      try {
+        const caches = await gh.goldenCaches(owner, repo);
+        const cache = caches[0];
+
+        setDd(
+          '[data-golden-cache]',
+          cache ? `${bytes(cache.size_in_bytes)}, used ${ago(cache.last_accessed_at)}` : 'Not cached yet',
+          cache?.key ?? ''
+        );
+      } catch (error) {
+        setDd('[data-golden-cache]', 'Unavailable', describe(error));
+      }
+    }
   } catch (error) {
+    setDd('[data-instance-os]', 'Virtual machine');
     setDd('[data-golden-tag]', 'Unavailable', describe(error));
     setDd('[data-golden-size]', 'Unavailable', describe(error));
-  }
-
-  try {
-    const caches = await gh.goldenCaches(owner, repo);
-    const cache = caches[0];
-    setDd('[data-golden-cache]', cache ? `${bytes(cache.size_in_bytes)}, used ${ago(cache.last_accessed_at)}` : 'Not cached yet', cache?.key ?? '');
-  } catch (error) {
-    setDd('[data-golden-cache]', 'Unavailable', describe(error));
+    setDd('[data-golden-cache]', 'Unknown');
   }
 
   // Persistence dataset.

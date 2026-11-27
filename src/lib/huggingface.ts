@@ -53,7 +53,7 @@ export class HuggingFaceClient {
     return (text ? JSON.parse(text) : null) as T;
   }
 
-  async goldenChecksum(value: string): Promise<string> {
+  private async goldenEntry(value: string): Promise<HfTreeEntry | undefined> {
     const url = new URL(value);
     const parts = url.pathname.split('/').filter(Boolean);
 
@@ -84,6 +84,16 @@ export class HuggingFaceClient {
       (item) => item.type === 'file' && item.path === filename
     );
 
+    return entry;
+  }
+
+  async goldenSize(value: string): Promise<number | null> {
+    const entry = await this.goldenEntry(value);
+    return entry?.lfs?.size ?? entry?.size ?? null;
+  }
+
+  async goldenChecksum(value: string): Promise<string> {
+    const entry = await this.goldenEntry(value);
     const hash = entry?.lfs?.oid;
 
     if (!hash || !/^[a-f0-9]{64}$/i.test(hash)) {

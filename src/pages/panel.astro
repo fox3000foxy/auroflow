@@ -4,7 +4,6 @@ import Icon from '../components/Icon.astro';
 import IconSprites from '../components/IconSprites.astro';
 import DeviceLogin from '../components/DeviceLogin.astro';
 import { href } from '../lib/paths';
-import { SPEC } from '../lib/config';
 import '../styles/app.css';
 import '../styles/panel.css';
 import '../styles/console-v2.css';
@@ -69,7 +68,7 @@ const stages = ['Runner', 'Dataset', 'Golden Image', 'Layers', 'Boot', 'Tunnel',
     <div class="panel" data-gate="ready" hidden>
       <header class="instance">
         <div class="instance__id">
-          <p class="instance__os">{SPEC.os}</p>
+          <p class="instance__os" data-instance-os>Virtual machine</p>
           <h1 class="instance__name" data-instance-name></h1>
           <a class="instance__repo" data-instance-repo target="_blank" rel="noopener noreferrer"></a>
         </div>
@@ -118,11 +117,30 @@ const stages = ['Runner', 'Dataset', 'Golden Image', 'Layers', 'Boot', 'Tunnel',
         </div>
       </div>
 
-      <section class="frame vm-resources-v2" aria-label="Virtual machine resources">
-        <h2>Allocated resources</h2><div class="resource-grid-v2">
-        {['vCPUs','Memory','Virtual disk','Acceleration'].map(label => <div><span>{label}</span><strong data-vm-resource={label}>Unavailable</strong></div>)}
-        </div><p data-vm-details>Waiting for current session metadata.</p>
+      <section class="frame vm-resources-v2" data-resource-section hidden aria-label="Virtual machine resources">
+        <h2>Compute resources</h2><div class="resource-grid-v2">
+        {['vCPUs','Memory','Virtual disk','Acceleration'].map(label => <div><span>{label}</span><strong data-vm-resource={label}>Pending</strong></div>)}
+        </div>
+        <p data-vm-details>Waiting for current session metadata.</p>
+        <p class="resource-runner">Runner: <span data-runner>Assigned at start</span></p>
       </section>
+          <!-- Lifecycle -->
+          <section class="frame" aria-labelledby="lifecycle-title">
+            <div class="frame__head">
+              <h2 class="frame__title" id="lifecycle-title"><Icon name="workflow" /> Lifecycle</h2>
+              <span class="frame__meta" data-lifecycle-meta></span>
+            </div>
+            <ol class="stages" data-stages>
+              {stages.map((label, index) => (
+                <li class="stage" data-stage-index={index} data-status="pending">
+                  <span class="stage__bar" aria-hidden="true"></span>
+                  <span class="stage__label">{label}</span>
+                  <span class="visually-hidden" data-stage-sr>pending</span>
+                </li>
+              ))}
+            </ol>
+          </section>
+
       <div class="panel__grid">
         <div class="panel__main">
           <!-- Connection -->
@@ -169,22 +187,6 @@ const stages = ['Runner', 'Dataset', 'Golden Image', 'Layers', 'Boot', 'Tunnel',
             </div>
           </section>
 
-          <!-- Lifecycle -->
-          <section class="frame" aria-labelledby="lifecycle-title">
-            <div class="frame__head">
-              <h2 class="frame__title" id="lifecycle-title"><Icon name="workflow" /> Lifecycle</h2>
-              <span class="frame__meta" data-lifecycle-meta></span>
-            </div>
-            <ol class="stages" data-stages>
-              {stages.map((label, index) => (
-                <li class="stage" data-stage-index={index} data-status="pending">
-                  <span class="stage__bar" aria-hidden="true"></span>
-                  <span class="stage__label">{label}</span>
-                  <span class="visually-hidden" data-stage-sr>pending</span>
-                </li>
-              ))}
-            </ol>
-          </section>
 
           <!-- Activity -->
           <section class="frame activity" aria-labelledby="activity-title">
@@ -195,6 +197,16 @@ const stages = ['Runner', 'Dataset', 'Golden Image', 'Layers', 'Boot', 'Tunnel',
                 <button class="tab" role="tab" type="button" id="tab-log" aria-controls="panel-log" aria-selected="false" tabindex="-1" data-tab="log">Panel log</button>
               </div>
             </div>
+            <details class="activity-run-details">
+              <summary>Workflow details</summary>
+              <dl class="kv frame__body">
+              <dt>Run</dt><dd data-gh-run>None</dd>
+              <dt>Status</dt><dd data-gh-status>None</dd>
+              <dt>Current step</dt><dd data-gh-step>None</dd>
+              <dt>Trigger</dt><dd data-gh-trigger>None</dd>
+              <dt>Created</dt><dd data-gh-created>None</dd>
+            </dl>
+            </details>
             <div role="tabpanel" id="panel-runs" aria-labelledby="tab-runs" data-tabpanel="runs">
               <table class="runs">
                 <thead>
@@ -218,27 +230,13 @@ const stages = ['Runner', 'Dataset', 'Golden Image', 'Layers', 'Boot', 'Tunnel',
         </div>
 
         <aside class="panel__side" aria-label="Instance details">
-          <section class="frame" aria-labelledby="compute-title">
-            <div class="frame__head">
-              <h2 class="frame__title" id="compute-title"><Icon name="cpu" /> Compute</h2>
-            </div>
-            <dl class="kv frame__body" data-compute>
-              <dt>Host</dt><dd>GitHub-hosted runner</dd>
-              <dt>Runner</dt><dd data-runner>Assigned at start</dd>
-              <dt>Hypervisor</dt><dd>QEMU/KVM, {SPEC.machine}</dd>
-              <dt>vCPUs</dt><dd>All runner processors</dd>
-              <dt>Memory</dt><dd>Available memory minus about 1 GiB</dd>
-              <dt>Firmware</dt><dd>{SPEC.firmware}</dd>
-              <dt>Time limit</dt><dd>300 min per session</dd>
-            </dl>
-          </section>
 
           <section class="frame" aria-labelledby="storage-title">
             <div class="frame__head">
               <h2 class="frame__title" id="storage-title"><Icon name="database" /> Storage</h2>
             </div>
             <dl class="kv frame__body">
-              <dt>Virtual disk</dt><dd>{SPEC.virtualDisk}, QCOW2</dd>
+              <dt>Virtual disk</dt><dd data-storage-disk>Not detected</dd>
               <dt>Golden Image</dt><dd data-golden-tag><span class="skeleton"></span></dd>
               <dt>Image size</dt><dd data-golden-size><span class="skeleton"></span></dd>
               <dt>Image cache</dt><dd data-golden-cache><span class="skeleton"></span></dd>
@@ -249,18 +247,7 @@ const stages = ['Runner', 'Dataset', 'Golden Image', 'Layers', 'Boot', 'Tunnel',
             <p class="frame__foot" data-storage-note hidden></p>
           </section>
 
-          <section class="frame frame--secondary" aria-labelledby="actions-title">
-            <div class="frame__head">
-              <h2 class="frame__title" id="actions-title"><Icon name="github" /> GitHub Actions</h2>
-            </div>
-            <dl class="kv frame__body">
-              <dt>Run</dt><dd data-gh-run>None</dd>
-              <dt>Status</dt><dd data-gh-status>None</dd>
-              <dt>Current step</dt><dd data-gh-step>None</dd>
-              <dt>Trigger</dt><dd data-gh-trigger>None</dd>
-              <dt>Created</dt><dd data-gh-created>None</dd>
-            </dl>
-          </section>
+
         </aside>
       </div>
     </div>
