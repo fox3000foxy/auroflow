@@ -1,3 +1,4 @@
+import { ensureSessionKey, decryptEndpoint } from './session-crypto';
 import { ApiError, isNotFound, kindForStatus } from './errors';
 import {
   CONTROL_BRANCH,
@@ -291,7 +292,20 @@ export class GitHubClient {
     return data.jobs;
   }
 
-  dispatch(owner: string, repo: string): Promise<void> {
+  async dispatch(owner: string, repo: string): Promise<void> {
+    const workflow = await this.workflowSource(owner, repo);
+
+    if (workflow?.includes('AUROFLOW_PUBLIC_KEY')) {
+      const publicKey = await ensureSessionKey(owner, repo);
+
+      await this.setVariable(
+        owner,
+        repo,
+        'AUROFLOW_PUBLIC_KEY',
+        publicKey
+      );
+    }
+
     return this.request(`/repos/${owner}/${repo}/actions/workflows/${WORKFLOW_FILE}/dispatches`, {
       method: 'POST',
       body: { ref: WORKFLOW_REF },
@@ -336,6 +350,41 @@ export class GitHubClient {
     }
     const raw = await this.fileText(owner, repo, SESSION_FILE, commit);
     if (raw === null) return { kind: 'missing' };
+    let data;
+
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      return parseSession(raw, runId, commit);
+    }
+
+    if (
+      data &&
+      String(data.run_id) === String(runId) &&
+      data.schema_version === 3
+    ) {
+      try {
+        const endpoint = await decryptEndpoint(
+          owner,
+          repo,
+          runId,
+          data.encrypted_endpoint
+        );
+
+        return parseSession(
+          JSON.stringify({ ...data, endpoint }),
+          runId,
+          commit
+        );
+      } catch {
+        return {
+          kind: 'invalid',
+          reason: 'Encrypted endpoint cannot be decrypted with this browser key.',
+          commit
+        };
+      }
+    }
+
     return parseSession(raw, runId, commit);
   }
 
